@@ -15,11 +15,8 @@
             font-family: 'Plus Jakarta Sans', sans-serif; 
             overflow: hidden; 
             height: 100vh; 
-            display: flex; 
-            flex-direction: row; /* Side by side */
         }
 
-        /* Responsive Layout Container */
         .main-wrapper {
             display: flex;
             width: 100%;
@@ -27,7 +24,6 @@
             flex-direction: row;
         }
 
-        /* Left Side: Animation */
         #canvas-container { 
             flex: 1;
             position: relative;
@@ -35,7 +31,6 @@
             pointer-events: none; 
         }
 
-        /* Right Side: Auth Card */
         .auth-section {
             flex: 1;
             display: flex;
@@ -59,17 +54,16 @@
         }
         
         h2 { margin-bottom: 25px; font-weight: 800; letter-spacing: -2px; font-size: 2rem; }
-        input { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: 1px solid #222; background: rgba(0,0,0,0.6); color: white; outline: none; transition: 0.3s; }
+        input { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: 1px solid #222; background: rgba(0,0,0,0.6); color: white; outline: none; transition: 0.3s; box-sizing: border-box;}
         input:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); }
         button { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--accent); color: #000; font-weight: 800; cursor: pointer; margin-top: 20px; transition: 0.3s; }
         button:hover { background: white; transform: translateY(-3px); }
-        .toggle { font-size: 0.85rem; margin-top: 25px; cursor: pointer; color: #888; text-align: center; }
+        .toggle { font-size: 0.85rem; margin-top: 25px; cursor: pointer; color: #888; text-align: center; text-decoration: underline; }
 
-        #signup-fields { transition: 0.4s; overflow: hidden; }
-        .hidden { max-height: 0; opacity: 0; pointer-events: none; }
-        .visible { max-height: 100px; opacity: 1; pointer-events: all; }
+        #signup-fields { transition: 0.4s ease; overflow: hidden; }
+        .hidden { max-height: 0; opacity: 0; pointer-events: none; margin: 0; }
+        .visible { max-height: 100px; opacity: 1; pointer-events: all; margin: 8px 0; }
 
-        /* MOBILE RESPONSIVE */
         @media (max-width: 850px) {
             body { overflow-y: auto; }
             .main-wrapper { flex-direction: column; height: auto; min-height: 100vh; }
@@ -127,6 +121,9 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
+        // --- GLOBAL STATE ---
+        let isLogin = true;
+
         // --- THREE.JS ENGINE ---
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
@@ -151,9 +148,9 @@
 
         const setColors = () => {
             for (let i = 0; i < particleCount; i++) {
-                colors[i * 3] = Math.random() * 0.5 + 0.5; // Brighter Neon R
-                colors[i * 3 + 1] = Math.random();         // G
-                colors[i * 3 + 2] = 1.0;                   // Deep B
+                colors[i * 3] = Math.random() * 0.5 + 0.5; 
+                colors[i * 3 + 1] = Math.random();         
+                colors[i * 3 + 2] = 1.0;                   
             }
             geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
         };
@@ -174,7 +171,7 @@
                 }
             }
             for (let i = 0; i < particleCount; i++) {
-                const p = pts[i % pts.length];
+                const p = pts[i % pts.length] || {x: (Math.random()-0.5)*10, y: (Math.random()-0.5)*10};
                 arr[i * 3] = p.x + (Math.random()-0.5)*0.05;
                 arr[i * 3 + 1] = p.y + (Math.random()-0.5)*0.05;
                 arr[i * 3 + 2] = (Math.random()-0.5)*0.2;
@@ -218,11 +215,22 @@
         }
         animate();
 
+        // --- EXPOSE FUNCTIONS TO WINDOW ---
         window.toggleMode = () => {
             isLogin = !isLogin;
-            document.getElementById('title').innerText = isLogin ? 'GBD Login' : 'Join GBD';
-            document.getElementById('signup-fields').className = isLogin ? 'hidden' : 'visible';
-            document.getElementById('toggleText').innerText = isLogin ? 'New to GBD? Create an Account' : 'Have an account? Login';
+            const signupFields = document.getElementById('signup-fields');
+            const title = document.getElementById('title');
+            const toggleText = document.getElementById('toggleText');
+
+            if (isLogin) {
+                title.innerText = 'GBD Login';
+                signupFields.className = 'hidden';
+                toggleText.innerText = 'New to GBD? Create an Account';
+            } else {
+                title.innerText = 'Join GBD';
+                signupFields.className = 'visible';
+                toggleText.innerText = 'Have an account? Login';
+            }
             createSphere(targetPositions);
         };
 
@@ -232,7 +240,9 @@
             const name = document.getElementById('username').value;
             const btn = document.getElementById('auth-btn');
 
-            if(!email || !password) return alert("All fields are required.");
+            if(!email || !password) return alert("Email and Password are required.");
+            if(!isLogin && !name) return alert("Please enter your GBD Name.");
+
             btn.innerText = "Processing...";
             btn.disabled = true;
 
@@ -242,7 +252,12 @@
                 } else {
                     const res = await createUserWithEmailAndPassword(auth, email, password);
                     await updateProfile(res.user, { displayName: name });
-                    await setDoc(doc(db, "users", res.user.uid), { uid: res.user.uid, displayName: name, email, joinedAt: Date.now() });
+                    await setDoc(doc(db, "users", res.user.uid), { 
+                        uid: res.user.uid, 
+                        displayName: name, 
+                        email, 
+                        joinedAt: Date.now() 
+                    });
                 }
                 createText("WELCOME", targetPositions);
                 document.getElementById('auth-card').style.opacity = '0';
