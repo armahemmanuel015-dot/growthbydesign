@@ -61,21 +61,28 @@ window.handleLogout = function() {
 
 // Auth State Observer (Switches screens)
 // Auth Guard & Redirection
+// Auth Guard Logic
 firebase.auth().onAuthStateChanged(user => {
-    const currentPage = window.location.pathname.split("/").pop();
-    
+    const path = window.location.pathname;
+    const isAuthPage = path.includes("index.html") || path.endsWith("/");
+
     if (user) {
-        // If logged in and on login page, go to dashboard
-        if (currentPage === "index.html" || currentPage === "") {
-            window.location.href = "dashboard.html";
-        }
+        if (isAuthPage) window.location.href = "dashboard.html";
+        // Initialize App
+        document.getElementById('userNameDisplay').innerText = user.displayName || "Brother";
+        initData(user.uid);
     } else {
-        // If NOT logged in and NOT on login page, go back to login
-        if (currentPage !== "index.html" && currentPage !== "") {
-            window.location.href = "index.html";
-        }
+        if (!isAuthPage) window.location.href = "index.html";
     }
 });
+
+// Production Theme Persistence
+function toggleTheme() {
+    document.body.classList.toggle('light-mode');
+    localStorage.setItem('gbd-theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+}
+
+if (localStorage.getItem('gbd-theme') === 'light') document.body.classList.add('light-mode');
 
 // Auth Toggle (Sliding animation)
 window.toggleAuth = function() {
