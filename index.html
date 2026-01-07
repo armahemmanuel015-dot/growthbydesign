@@ -27,44 +27,100 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, getDocs, setDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyCu03ePMFx9mDgbCdT9LWcoPOg2SGQIBEU",
-            authDomain: "growthbydesign-2a6d0.firebaseapp.com",
-            projectId: "growthbydesign-2a6d0",
-            storageBucket: "growthbydesign-2a6d0.firebasestorage.app",
-            messagingSenderId: "807311473882",
-            appId: "1:807311473882:web:49300d2d84355eb4cbb9e3"
-        };
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
+const firebaseConfig = { /* YOUR CONFIG */ };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
-        let isLogin = true;
-        document.getElementById('signup-fields').style.display = 'none';
+let currentUser = null;
+const todayKey = new Date().toISOString().split('T')[0];
 
-        window.toggleMode = () => {
-            isLogin = !isLogin;
-            document.getElementById('title').innerText = isLogin ? 'Sprint Login' : 'Join Sprint';
-            document.getElementById('signup-fields').style.display = isLogin ? 'none' : 'block';
-            document.getElementById('toggleText').innerText = isLogin ? 'New here? Create an account' : 'Have an account? Login';
-        };
+onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        window.location.href = 'index.html';
+    } else {
+        currentUser = user;
+        // CREATE USER IN DB IF NOT EXISTS
+        await setDoc(doc(db, "users", user.uid), {
+            uid: user.uid,
+            displayName: user.displayName,
+            email: user.email
+        }, { merge: true });
+        
+        initApp();
+    }
+});
 
-        window.handleAuth = async () => {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            try {
-                if (isLogin) {
-                    await signInWithEmailAndPassword(auth, email, password);
-                } else {
-                    const name = document.getElementById('username').value;
-                    const res = await createUserWithEmailAndPassword(auth, email, password);
-                    await updateProfile(res.user, { displayName: name });
-                }
-                window.location.href = 'app/app.html';
-            } catch (err) { alert(err.message); }
-        };
+// --- CORE LOGIC ---
+
+async function initApp() {
+    // 1. Get current user's completions for today to set checkbox states
+    const myCompletionsQuery = query(
+        collection(db, "completions"), 
+        where("userId", "==", currentUser.uid),
+        where("dateKey", "==", todayKey)
+    );
+    const myCompletionsSnap = await getDocs(myCompletionsQuery);
+    const finishedTaskIds = new Set();
+    myCompletionsSnap.forEach(doc => finishedTaskIds.add(doc.data().taskId));
+
+    // 2. Load Shared Tasks and Apply Checkbox state
+    onSnapshot(collection(db, "sharedTasks"), (snap) => {
+        const list = document.getElementById('taskList');
+        list.innerHTML = "";
+        snap.forEach(tDoc => {
+            const task = tDoc.data();
+            const isChecked = finishedTaskIds.has(tDoc.id) ? "checked disabled" : "";
+            list.innerHTML += `
+                <div class="task-item">
+                    <label class="checkbox-container">
+                        <input type="checkbox" ${isChecked} onchange="tickTask('${tDoc.id}', '${task.name}')">
+                        ${task.name}
+                    </label>
+                    <button class="delete-btn" onclick="deleteTask('${tDoc.id}')">×</button>
+                </div>`;
+        });
+    });
+
+    // 3. Leaderboard Listener
+    const qLeader = query(collection(db, "completions"), where("dateKey", "==", todayKey), orderBy("timestamp", "asc"));
+    onSnapshot(qLeader, (snap) => {
+        const list = document.getElementById('leaderList');
+        list.innerHTML = "";
+        snap.forEach(doc => {
+            const d = doc.data();
+            list.innerHTML += `<div class="leader-row">
+                <span><b>${d.userName}</b>: ${d.taskName}</span>
+                <span class="time-tag">${new Date(d.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+            </div>`;
+        });
+    });
+}
+
+window.tickTask = async (taskId, taskName) => {
+    const now = new Date();
+    // 11:50 PM DEADLINE CHECK
+    if (now.getHours() === 23 && now.getMinutes() >= 50) {
+        alert("Window closed at 11:50 PM!");
+        location.reload(); // Reset checkbox
+        return;
+    }
+
+    await addDoc(collection(db, "completions"), {
+        taskId,
+        taskName,
+        userId: currentUser.uid,
+        userName: currentUser.displayName,
+        timestamp: Date.now(),
+        dateKey: todayKey
+    });
+    alert("Task recorded!");
+    location.reload(); // Refresh to lock the checkbox
+};
     </script>
 </body>
 </html>
