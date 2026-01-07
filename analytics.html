@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GBD | Analytics</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo">GBD.</div>
+        <ul class="nav-links">
+            <li><a href="dashboard.html"><i data-lucide="layout"></i><span>Tasks</span></a></li>
+            <li class="active"><a href="analytics.html"><i data-lucide="bar-chart-2"></i><span>Stats</span></a></li>
+            <li onclick="toggleTheme()"><i data-lucide="sun"></i><span>Theme</span></li>
+            <li onclick="handleLogout()" class="logout-link"><i data-lucide="log-out"></i><span>Exit</span></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <h1>Brotherhood Analytics</h1>
+        
+        <div class="analytics-grid">
+            <div class="card chart-container">
+                <h3>Velocity Chart</h3>
+                <canvas id="mainVelocityChart"></canvas>
+            </div>
+            
+            <div class="card">
+                <h3>The Leaderboard</h3>
+                <div id="miniLeaderboard"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
