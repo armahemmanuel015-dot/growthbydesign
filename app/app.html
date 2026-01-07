@@ -192,7 +192,7 @@
             location.reload();
         };
 
-        // --- ANALYTICS ENGINE ---
+// --- ANALYTICS ENGINE ---
         async function runAnalytics() {
             const perfContent = document.getElementById('performanceContent');
             const heatmapContent = document.getElementById('heatmapContent');
@@ -216,7 +216,7 @@
                 userActivity[d.userId][d.dateKey] = true;
             });
 
-            // Render Task Performance
+            // Render Task Performance (Remains the same)
             perfContent.innerHTML = "";
             Object.entries(taskStats).forEach(([name, data]) => {
                 const avgMin = data.totalMin / data.count;
@@ -233,23 +233,29 @@
                     </div>`;
             });
 
-            // Render Heatmap (Last 7 Days)
+            // NEW: Render Heatmap (Showing Mon, Tue, Wed, etc.)
+            const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
             let heatmapHtml = `<table class="heatmap-table"><tr><th>User</th>`;
+            
             const last7Days = [];
             for(let i=6; i>=0; i--) {
-                const d = new Date(); d.setDate(d.getDate() - i);
+                const d = new Date();
+                d.setDate(d.getDate() - i);
                 const key = d.toISOString().split('T')[0];
+                const dayLabel = dayNames[d.getDay()]; // Gets "Mon", "Tue", etc.
                 last7Days.push(key);
-                heatmapHtml += `<th>${d.getDate()}</th>`;
+                heatmapHtml += `<th>${dayLabel}</th>`;
             }
             heatmapHtml += `</tr>`;
 
             usersSnap.forEach(uDoc => {
                 const user = uDoc.data();
-                heatmapHtml += `<tr><td>${user.displayName}</td>`;
+                heatmapHtml += `<tr><td>${user.displayName || 'Unknown'}</td>`;
                 last7Days.forEach(day => {
                     const active = userActivity[user.uid] && userActivity[user.uid][day];
-                    heatmapHtml += `<td class="${active ? 'cell-active' : 'cell-inactive'}"></td>`;
+                    heatmapHtml += `<td class="${active ? 'cell-active' : 'cell-inactive'}">
+                        ${active ? '✓' : ''}
+                    </td>`;
                 });
                 heatmapHtml += `</tr>`;
             });
