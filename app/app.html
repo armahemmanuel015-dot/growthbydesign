@@ -46,7 +46,6 @@
             font-size: 0.75rem; letter-spacing: 1px; transition: 0.3s; border-radius: 12px;
         }
         nav button.active { color: var(--accent); background: rgba(0, 242, 255, 0.05); box-shadow: var(--cyber-glow); }
-        nav button:hover:not(.active) { color: var(--accent); }
 
         .container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
         .view { display: none; animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
@@ -54,20 +53,32 @@
 
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* Profile Header */
+        .profile-card {
+            display: flex; align-items: center; gap: 20px;
+            padding: 20px; background: var(--surface);
+            border-radius: 24px; border: 1px solid var(--glass-border);
+            margin-bottom: 30px;
+        }
+        .avatar {
+            width: 50px; height: 50px; border-radius: 15px;
+            background: var(--accent); color: #000;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 1.2rem;
+            box-shadow: var(--cyber-glow);
+        }
+
         .card { 
             background: var(--surface); border: 1px solid var(--glass-border); 
             border-radius: 24px; padding: 28px; margin-bottom: 24px;
             backdrop-filter: blur(10px); transition: 0.3s;
         }
-        .card:hover { border-color: rgba(0, 242, 255, 0.3); }
 
-        /* Directives */
         .task-item {
             background: rgba(255,255,255,0.02); padding: 18px; border-radius: 16px;
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 12px; border: 1px solid var(--glass-border); transition: 0.3s;
+            margin-bottom: 12px; border: 1px solid var(--glass-border);
         }
-        .task-item:hover { background: rgba(255,255,255,0.04); }
 
         .check-btn {
             width: 28px; height: 28px; border-radius: 8px; border: 2px solid var(--glass-border);
@@ -76,54 +87,26 @@
         }
         .check-btn.done { background: var(--success); border-color: var(--success); color: white; }
 
-        /* Intelligence & Collapsibles */
+        /* Intelligence */
         .collapse-header { cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        
-        .collapse-content { 
-            max-height: 0; opacity: 0; overflow: hidden; 
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
-        }
-        .collapse-content.open { 
-            max-height: 1000px; opacity: 1; padding-top: 20px; margin-top: 15px; 
-            border-top: 1px solid var(--glass-border); 
-        }
-
+        .collapse-content { max-height: 0; opacity: 0; overflow: hidden; transition: all 0.4s; }
+        .collapse-content.open { max-height: 1000px; opacity: 1; padding-top: 20px; border-top: 1px solid var(--glass-border); }
         .toggle-icon { font-size: 1.2rem; color: var(--accent); transition: 0.3s; }
-        .card:has(.open) .toggle-icon { transform: rotate(45deg); color: var(--danger); }
 
         .mini-heatmap { display: flex; gap: 6px; margin-top: 10px; }
         .day-box { flex: 1; height: 10px; border-radius: 3px; background: rgba(255,255,255,0.05); }
-        .day-box.active { background: var(--accent); box-shadow: 0 0 10px rgba(0, 242, 255, 0.4); }
+        .day-box.active { background: var(--accent); }
 
-        /* Leaderboard */
-        .rank-row { 
-            display: flex; align-items: center; padding: 16px; 
-            background: rgba(255,255,255,0.03); border-radius: 20px; margin-bottom: 12px;
-        }
-        .rank-medal { 
-            width: 40px; height: 40px; border-radius: 12px; display: flex; 
-            align-items: center; justify-content: center; font-weight: 800; margin-right: 20px; 
-        }
+        .rank-row { display: flex; align-items: center; padding: 16px; background: rgba(255,255,255,0.03); border-radius: 20px; margin-bottom: 12px; }
+        .rank-medal { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; margin-right: 20px; }
         .rank-1 { background: var(--gold); color: #000; }
 
-        /* Inputs & Buttons */
-        .input-group { 
-            display: flex; gap: 12px; background: rgba(0,0,0,0.3); padding: 10px; 
-            border-radius: 18px; border: 1px solid var(--glass-border); margin-bottom: 32px; 
-        }
+        .input-group { display: flex; gap: 12px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 18px; border: 1px solid var(--glass-border); margin-bottom: 32px; }
         input[type="text"] { background: none; border: none; padding: 12px; color: white; flex: 1; outline: none; font-family: inherit; }
         
-        .btn-primary { 
-            background: var(--accent); color: #000; border: none; padding: 12px 24px; 
-            border-radius: 14px; font-weight: 800; cursor: pointer; transition: 0.3s;
-        }
-        .btn-primary:hover { background: white; transform: translateY(-2px); }
+        .btn-primary { background: var(--accent); color: #000; border: none; padding: 12px 24px; border-radius: 14px; font-weight: 800; cursor: pointer; }
 
-        #victoryOverlay {
-            position: fixed; inset: 0; background: rgba(5,7,10,0.95); z-index: 2000;
-            display: none; flex-direction: column; align-items: center; justify-content: center;
-            backdrop-filter: blur(15px);
-        }
+        #victoryOverlay { position: fixed; inset: 0; background: rgba(5,7,10,0.95); z-index: 2000; display: none; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); }
     </style>
 </head>
 <body>
@@ -145,6 +128,14 @@
     </nav>
 
     <div class="container">
+        <div class="profile-card">
+            <div class="avatar" id="userInitial">?</div>
+            <div>
+                <div style="font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px;">Identity Authenticated</div>
+                <div id="userNameDisplay" style="font-weight: 800; font-size: 1.2rem; color: var(--accent);">Loading...</div>
+            </div>
+        </div>
+
         <section id="tasks-view" class="view active">
             <h2 style="font-weight: 800; font-size: 2rem; letter-spacing: -1px;">Active Objectives</h2>
             <div class="input-group">
@@ -161,14 +152,14 @@
 
         <section id="analytics-view" class="view">
             <h2 style="font-weight: 800; font-size: 2rem; letter-spacing: -1px;">Intelligence</h2>
-            <p style="color: var(--text-dim); margin-top: -15px; margin-bottom: 30px; font-size: 0.85rem;">Historical performance over the last 7 cycles.</p>
+            <p style="color: var(--text-dim); margin-top: -15px; margin-bottom: 30px; font-size: 0.85rem;">Historical performance (Last 7 Days).</p>
             <div id="intelligenceContent"></div>
         </section>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, getDocs, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, getDocs, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -185,14 +176,26 @@
         const auth = getAuth(app);
 
         let currentUser = null;
+        let userData = null;
         const todayKey = new Date().toISOString().split('T')[0];
 
         onAuthStateChanged(auth, async (user) => {
-            if (!user) window.location.href = 'index.html'; 
-            else { 
-                currentUser = user; 
-                await setDoc(doc(db, "users", user.uid), { uid: user.uid, email: user.email }, { merge: true });
-                initApp(); 
+            if (!user) {
+                window.location.href = 'index.html';
+            } else {
+                currentUser = user;
+                // Fetch User Profile
+                const userRef = doc(db, "users", user.uid);
+                const userSnap = await getDoc(userRef);
+                
+                if (userSnap.exists()) {
+                    userData = userSnap.data();
+                    const name = userData.displayName || user.email.split('@')[0];
+                    document.getElementById('userNameDisplay').innerText = name;
+                    document.getElementById('userInitial').innerText = name.charAt(0).toUpperCase();
+                }
+                
+                initApp();
             }
         });
 
@@ -211,6 +214,7 @@
             document.getElementById(id).classList.toggle('open');
         };
 
+        // SHARED TASK LIST (Everyone sees these)
         window.addSharedTask = async () => {
             const name = document.getElementById('newTask').value;
             if(!name) return;
@@ -218,20 +222,30 @@
             document.getElementById('newTask').value = "";
         };
 
+        // COMPLETION LOGIC (Unique per user/day)
         window.tickTask = async (taskId, taskName) => {
+            const name = userData.displayName || currentUser.email.split('@')[0];
             await addDoc(collection(db, "completions"), {
                 taskId, taskName, userId: currentUser.uid, 
-                userName: currentUser.displayName || currentUser.email.split('@')[0],
+                userName: name,
                 timestamp: Date.now(), dateKey: todayKey
             });
-            refreshAll();
+            // Manual refresh for instant feedback
+            initApp(); 
         };
 
         window.closeVictory = () => { document.getElementById('victoryOverlay').style.display = 'none'; };
 
         async function initApp() {
+            // Watch tasks
             onSnapshot(query(collection(db, "sharedTasks"), orderBy("createdAt", "asc")), async (snap) => {
-                const compsSnap = await getDocs(query(collection(db, "completions"), where("userId", "==", currentUser.uid), where("dateKey", "==", todayKey)));
+                // Fetch ONLY current user's completions for TODAY to mark checkboxes
+                const compsSnap = await getDocs(query(
+                    collection(db, "completions"), 
+                    where("userId", "==", currentUser.uid), 
+                    where("dateKey", "==", todayKey)
+                ));
+                
                 const finishedIds = new Set();
                 compsSnap.forEach(d => finishedIds.add(d.data().taskId));
 
@@ -280,9 +294,8 @@
                     <div class="rank-medal ${i === 0 ? 'rank-1' : ''}">${i + 1}</div>
                     <div style="flex:1">
                         <div style="font-weight:800;">${data.name}</div>
-                        <div style="font-size:0.7rem; color:var(--text-dim)">Total Tasks Cleared</div>
+                        <div style="font-size:0.7rem; color:var(--text-dim)">Points: ${data.totalAllTime}</div>
                     </div>
-                    <div style="font-size:1.4rem; font-weight:900; color:var(--accent)">${data.totalAllTime}</div>
                 </div>`).join('');
         }
 
@@ -308,7 +321,6 @@
                     <div class="collapse-header" onclick="toggleCollapse('col-${uid}')">
                         <div>
                             <div style="font-weight:900; font-size:1.1rem; color:var(--accent);">${data.name}</div>
-                            <div style="font-size:0.7rem; color:var(--text-dim)">View consistency map</div>
                         </div>
                         <div class="toggle-icon">+</div>
                     </div>
