@@ -693,3 +693,11 @@ body { background: var(--bg); color: var(--text); min-height: 100vh; overflow-x:
     outline: none;
     cursor: pointer;
 }
+.recurrence-badge {
+    font-size: 10px;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin-top: 2px;
+}
