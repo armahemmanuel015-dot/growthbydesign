@@ -23,6 +23,7 @@
                 <div class="field-wrapper slide-element">
                     <input type="password" id="loginPass" required><label>Password</label>
                 </div>
+                <br>
                 <button class="submit-button slide-element" id="loginBtn">Enter Design</button>
                 <p class="switch-link slide-element">New Brother? <a href="#" onclick="toggleAuth()">Join Now</a></p>
             </div>
@@ -32,7 +33,7 @@
                 <div class="field-wrapper"><input type="text" id="regName" required><label>Full Name</label></div>
                 <div class="field-wrapper"><input type="email" id="regEmail" required><label>Email</label></div>
                 <div class="field-wrapper"><input type="password" id="regPass" required><label>Password</label></div>
-                <button class="submit-button" id="signUpBtn">Sign the Covenant</button>
+                <button class="submit-button" id="signUpBtn">Join</button>
                 <p class="switch-link">Back to <a href="#" onclick="toggleAuth()">Login</a></p>
             </div>
         </div>
@@ -72,24 +73,32 @@
             <input type="text" id="taskInput" placeholder="What is the next discipline?" 
                    style="width: 100%; font-size: 18px; background: transparent; border: none; border-bottom: 2px solid #2e3a59; padding: 10px 0;">
             
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div class="selector-group">
-                    <i data-lucide="layers" size="16"></i>
-                    <select id="pillarInput">
-                        <option value="Spiritual">Spiritual</option>
-                        <option value="Intellectual">Intellectual</option>
-                        <option value="Character">Character</option>
-                    </select>
-                    
-                    <div style="width: 1px; background: #2e3a59; margin: 0 10px;"></div>
-                    
-                    <i data-lucide="flag" size="16"></i>
-                    <select id="priorityInput">
-                        <option value="urgent">Urgent</option>
-                        <option value="high">High</option>
-                        <option value="normal">Normal</option>
-                    </select>
-                </div>
+           <div class="selector-group">
+    <i data-lucide="refresh-cw" size="16"></i>
+    <select id="frequencyInput">
+        <option value="once">One-time</option>
+        <option value="daily">Daily</option>
+        <option value="weekly">Weekly</option>
+    </select>
+    
+    <div style="width: 1px; background: #2e3a59; margin: 0 10px;"></div>
+
+    <i data-lucide="layers" size="16"></i>
+    <select id="pillarInput">
+        <option value="Spiritual">Spiritual</option>
+        <option value="Intellectual">Intellectual</option>
+        <option value="Character">Character</option>
+    </select>
+    
+    <div style="width: 1px; background: #2e3a59; margin: 0 10px;"></div>
+    
+    <i data-lucide="flag" size="16"></i>
+    <select id="priorityInput">
+        <option value="urgent">Urgent</option>
+        <option value="high">High</option>
+        <option value="normal">Normal</option>
+    </select>
+</div>
                 
                 <button class="submit-button" onclick="addTask()" style="height: 45px; width: 140px;">Create Task</button>
             </div>
@@ -103,6 +112,7 @@
         <span>Actions</span>
     </div>
     <div id="masterTaskList"></div>
+            
 </main>
 
         <main id="statsView" class="view-section">
