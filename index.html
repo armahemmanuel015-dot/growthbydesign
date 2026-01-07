@@ -3,51 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Growth By Design</title>
+    <title>Growth By Design | HQ</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css" rel="stylesheet">
 </head>
 <body>
-    <div class="app-container">
-        <header class="admin-banner" id="adminBanner">
-            <span class="icon">👑</span>
-            <div class="admin-text">
-                <strong>CAPTAIN'S LOG:</strong>
-                <p id="adminMsg">"Success is a choice. Failure is a design flaw. Finish your tasks."</p>
+    <div class="workspace">
+        <nav class="sidebar">
+            <div class="logo">GBD<span>.</span></div>
+            <ul class="nav-links">
+                <li class="active"><i class="lucide-layout-dashboard"></i> Dashboard</li>
+                <li><i class="lucide-bar-chart-3"></i> Analytics</li>
+                <li><i class="lucide-message-square"></i> Locker Room</li>
+                <li><i class="lucide-shield-check"></i> The Covenant</li>
+            </ul>
+            <div class="user-profile">
+                <div class="avatar">O</div>
+                <span>Omar (Admin)</span>
             </div>
-        </header>
+        </nav>
 
-        <section class="brotherboard">
-            <h3>THE BROTHERBOARD</h3>
-            <div id="leaderboard" class="cards-grid">
+        <main class="content">
+            <header class="top-bar">
+                <div class="greeting">
+                    <h1>Daily Performance</h1>
+                    <p>Wednesday, January 7, 2026</p>
                 </div>
-        </section>
+                <div class="admin-announcement">
+                    <span class="badge">COMMAND</span>
+                    <p id="command-text">"Are you the one to come, or should we wait for another?"</p>
+                </div>
+            </header>
 
-        <section class="tasks-section">
-            <h3>DAILY DESIGN</h3>
-            <div class="task-pillars">
-                <div class="pillar" data-pillar="Spiritual">
-                    <h4>Spiritual</h4>
-                    <div class="task-list" id="spiritualTasks"></div>
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <span class="label">Group Velocity</span>
+                    <div class="value">84%</div>
+                    <div class="trend up">+4.2%</div>
                 </div>
-                <div class="pillar" data-pillar="Intellectual">
-                    <h4>Intellectual</h4>
-                    <div class="task-list" id="intellectualTasks"></div>
+                <div class="stat-card">
+                    <span class="label">Active Streaks</span>
+                    <div class="value">3/4</div>
+                    <div class="trend">Steady</div>
                 </div>
-                <div class="pillar" data-pillar="Character">
-                    <h4>Character</h4>
-                    <div class="task-list" id="characterTasks"></div>
-                </div>
-            </div>
-        </section>
+            </section>
 
-        <section class="locker-room">
-            <h3>LOCKER ROOM</h3>
-            <div id="feed" class="feed-container">
-                <div class="feed-item system">System: Monitoring discipline...</div>
-            </div>
-        </section>
+            <section class="main-board">
+                <div class="board-header">
+                    <h3>Brotherboard</h3>
+                    <button class="btn-primary">+ Add Task</button>
+                </div>
+                <table class="design-table">
+                    <thead>
+                        <tr>
+                            <th>Brother</th>
+                            <th>Spiritual</th>
+                            <th>Intellectual</th>
+                            <th>Character</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        </tbody>
+                </table>
+            </section>
+        </main>
     </div>
-
-    <script src="script.js"></script>
 </body>
 </html>
