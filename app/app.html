@@ -14,8 +14,6 @@
         }
 
         body { margin: 0; background: var(--bg); color: white; font-family: 'Inter', sans-serif; }
-        
-        /* Navigation */
         nav { display: flex; justify-content: center; background: rgba(0,0,0,0.4); padding: 15px; position: sticky; top: 0; backdrop-filter: blur(10px); border-bottom: 1px solid var(--glass); z-index: 100; }
         nav button { background: none; border: none; color: white; margin: 0 15px; cursor: pointer; opacity: 0.6; font-weight: 600; }
         nav button.active { opacity: 1; color: var(--accent); border-bottom: 2px solid var(--accent); }
@@ -24,27 +22,25 @@
         .view { display: none; }
         .active { display: block; }
 
-        /* Cards & UI */
         .card { background: var(--glass); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
         .input-group { display: flex; gap: 10px; margin-bottom: 20px; }
         input[type="text"] { background: rgba(255,255,255,0.1); border: 1px solid var(--glass); padding: 12px; color: white; border-radius: 8px; flex: 1; outline: none; }
         
-        .task-item { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 15px; background: rgba(255,255,255,0.03); margin: 10px 0; 
-            border-radius: 12px; border-left: 4px solid var(--accent);
-        }
-
-        /* Custom Checkbox */
+        .task-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: rgba(255,255,255,0.03); margin: 10px 0; border-radius: 12px; border-left: 4px solid var(--accent); }
         .checkbox-container { display: flex; align-items: center; gap: 15px; font-size: 1.1rem; cursor: pointer; }
         input[type="checkbox"] { width: 22px; height: 22px; cursor: pointer; accent-color: var(--success); }
 
         .delete-btn { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 1.2rem; font-weight: bold; opacity: 0.5; }
-        .delete-btn:hover { opacity: 1; }
-
         .leader-row { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid var(--glass); }
         .time-tag { color: var(--accent); font-weight: bold; }
-        .status-badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; background: var(--success); color: #000; }
+        
+        /* Analytics Styles */
+        .heatmap-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.8rem; }
+        .heatmap-table th, .heatmap-table td { padding: 8px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        .cell-active { background: var(--success); }
+        .cell-inactive { background: rgba(255,255,255,0.05); }
+        .perf-bar-bg { background: rgba(255,255,255,0.1); height: 8px; border-radius: 4px; margin-top: 8px; overflow: hidden; }
+        .perf-bar-fill { background: var(--accent); height: 100%; }
     </style>
 </head>
 <body>
@@ -71,207 +67,194 @@
         <section id="leader-view" class="view">
             <div class="card">
                 <h2>Today's Velocity</h2>
-                <p style="font-size: 0.8rem; color: #888;">Ranked by earliest completion</p>
                 <div id="leaderList"></div>
             </div>
         </section>
 
         <section id="analytics-view" class="view">
-            <div class="card">
-                <h2>Who Succeeded Yesterday?</h2>
-                <div id="analyticsContent"></div>
+            <div class="card" id="task-performance">
+                <h2>Performance Per Task</h2>
+                <div id="performanceContent"></div>
+            </div>
+            <div class="card" id="consistency-heatmap">
+                <h2>7-Day Consistency</h2>
+                <div id="heatmapContent"></div>
             </div>
         </section>
     </div>
 
     <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, getDocs, setDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, getDocs, setDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
-const firebaseConfig = { /* YOUR CONFIG */ };
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+        const firebaseConfig = {
+            apiKey: "AIzaSyCu03ePMFx9mDgbCdT9LWcoPOg2SGQIBEU",
+            authDomain: "growthbydesign-2a6d0.firebaseapp.com",
+            projectId: "growthbydesign-2a6d0",
+            storageBucket: "growthbydesign-2a6d0.firebasestorage.app",
+            messagingSenderId: "807311473882",
+            appId: "1:807311473882:web:49300d2d84355eb4cbb9e3"
+        };
 
-let currentUser = null;
-const todayKey = new Date().toISOString().split('T')[0];
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
 
-onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-        window.location.href = 'index.html';
-    } else {
-        currentUser = user;
-        // CREATE USER IN DB IF NOT EXISTS
-        await setDoc(doc(db, "users", user.uid), {
-            uid: user.uid,
-            displayName: user.displayName,
-            email: user.email
-        }, { merge: true });
-        
-        initApp();
-    }
-});
+        let currentUser = null;
+        const todayKey = new Date().toISOString().split('T')[0];
 
-// --- CORE LOGIC ---
-
-async function initApp() {
-    // 1. Get current user's completions for today to set checkbox states
-    const myCompletionsQuery = query(
-        collection(db, "completions"), 
-        where("userId", "==", currentUser.uid),
-        where("dateKey", "==", todayKey)
-    );
-    const myCompletionsSnap = await getDocs(myCompletionsQuery);
-    const finishedTaskIds = new Set();
-    myCompletionsSnap.forEach(doc => finishedTaskIds.add(doc.data().taskId));
-
-    // 2. Load Shared Tasks and Apply Checkbox state
-    onSnapshot(collection(db, "sharedTasks"), (snap) => {
-        const list = document.getElementById('taskList');
-        list.innerHTML = "";
-        snap.forEach(tDoc => {
-            const task = tDoc.data();
-            const isChecked = finishedTaskIds.has(tDoc.id) ? "checked disabled" : "";
-            list.innerHTML += `
-                <div class="task-item">
-                    <label class="checkbox-container">
-                        <input type="checkbox" ${isChecked} onchange="tickTask('${tDoc.id}', '${task.name}')">
-                        ${task.name}
-                    </label>
-                    <button class="delete-btn" onclick="deleteTask('${tDoc.id}')">×</button>
-                </div>`;
+        onAuthStateChanged(auth, async (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+            } else {
+                currentUser = user;
+                await setDoc(doc(db, "users", user.uid), {
+                    uid: user.uid,
+                    displayName: user.displayName,
+                    email: user.email
+                }, { merge: true });
+                initApp();
+            }
         });
-    });
 
-    // 3. Leaderboard Listener
-    const qLeader = query(collection(db, "completions"), where("dateKey", "==", todayKey), orderBy("timestamp", "asc"));
-    onSnapshot(qLeader, (snap) => {
-        const list = document.getElementById('leaderList');
-        list.innerHTML = "";
-        snap.forEach(doc => {
-            const d = doc.data();
-            list.innerHTML += `<div class="leader-row">
-                <span><b>${d.userName}</b>: ${d.taskName}</span>
-                <span class="time-tag">${new Date(d.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
-            </div>`;
-        });
-    });
-}
+        window.logout = () => signOut(auth);
 
-window.tickTask = async (taskId, taskName) => {
-    const now = new Date();
-    // 11:50 PM DEADLINE CHECK
-    if (now.getHours() === 23 && now.getMinutes() >= 50) {
-        alert("Window closed at 11:50 PM!");
-        location.reload(); // Reset checkbox
-        return;
-    }
+        window.showView = (id) => {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById('nav-' + id.split('-')[0]).classList.add('active');
+            if(id === 'analytics-view') runAnalytics();
+        };
 
-    await addDoc(collection(db, "completions"), {
-        taskId,
-        taskName,
-        userId: currentUser.uid,
-        userName: currentUser.displayName,
-        timestamp: Date.now(),
-        dateKey: todayKey
-    });
-    alert("Task recorded!");
-    location.reload(); // Refresh to lock the checkbox
-};import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, getDocs, setDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+        window.addSharedTask = async () => {
+            const name = document.getElementById('newTask').value;
+            if(!name) return;
+            await addDoc(collection(db, "sharedTasks"), { name, createdAt: Date.now() });
+            document.getElementById('newTask').value = "";
+        };
 
-const firebaseConfig = { /* YOUR CONFIG */ };
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+        window.deleteTask = async (id) => {
+            if(confirm("Delete this task for everyone?")) {
+                await deleteDoc(doc(db, "sharedTasks", id));
+            }
+        };
 
-let currentUser = null;
-const todayKey = new Date().toISOString().split('T')[0];
+        async function initApp() {
+            const myCompletionsQuery = query(collection(db, "completions"), where("userId", "==", currentUser.uid), where("dateKey", "==", todayKey));
+            const myCompletionsSnap = await getDocs(myCompletionsQuery);
+            const finishedTaskIds = new Set();
+            myCompletionsSnap.forEach(doc => finishedTaskIds.add(doc.data().taskId));
 
-onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-        window.location.href = 'index.html';
-    } else {
-        currentUser = user;
-        // CREATE USER IN DB IF NOT EXISTS
-        await setDoc(doc(db, "users", user.uid), {
-            uid: user.uid,
-            displayName: user.displayName,
-            email: user.email
-        }, { merge: true });
-        
-        initApp();
-    }
-});
+            onSnapshot(collection(db, "sharedTasks"), (snap) => {
+                const list = document.getElementById('taskList');
+                list.innerHTML = "";
+                snap.forEach(tDoc => {
+                    const task = tDoc.data();
+                    const isChecked = finishedTaskIds.has(tDoc.id) ? "checked disabled" : "";
+                    list.innerHTML += `
+                        <div class="task-item">
+                            <label class="checkbox-container">
+                                <input type="checkbox" ${isChecked} onchange="tickTask('${tDoc.id}', '${task.name}')">
+                                ${task.name}
+                            </label>
+                            <button class="delete-btn" onclick="deleteTask('${tDoc.id}')">×</button>
+                        </div>`;
+                });
+            });
 
-// --- CORE LOGIC ---
+            const qLeader = query(collection(db, "completions"), where("dateKey", "==", todayKey), orderBy("timestamp", "asc"));
+            onSnapshot(qLeader, (snap) => {
+                const list = document.getElementById('leaderList');
+                list.innerHTML = "";
+                snap.forEach(doc => {
+                    const d = doc.data();
+                    list.innerHTML += `<div class="leader-row">
+                        <span><b>${d.userName}</b>: ${d.taskName}</span>
+                        <span class="time-tag">${new Date(d.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
+                    </div>`;
+                });
+            });
+        }
 
-async function initApp() {
-    // 1. Get current user's completions for today to set checkbox states
-    const myCompletionsQuery = query(
-        collection(db, "completions"), 
-        where("userId", "==", currentUser.uid),
-        where("dateKey", "==", todayKey)
-    );
-    const myCompletionsSnap = await getDocs(myCompletionsQuery);
-    const finishedTaskIds = new Set();
-    myCompletionsSnap.forEach(doc => finishedTaskIds.add(doc.data().taskId));
+        window.tickTask = async (taskId, taskName) => {
+            const now = new Date();
+            if (now.getHours() === 23 && now.getMinutes() >= 50) {
+                alert("Window closed at 11:50 PM!");
+                location.reload();
+                return;
+            }
+            await addDoc(collection(db, "completions"), {
+                taskId, taskName, userId: currentUser.uid, userName: currentUser.displayName,
+                timestamp: Date.now(), dateKey: todayKey
+            });
+            location.reload();
+        };
 
-    // 2. Load Shared Tasks and Apply Checkbox state
-    onSnapshot(collection(db, "sharedTasks"), (snap) => {
-        const list = document.getElementById('taskList');
-        list.innerHTML = "";
-        snap.forEach(tDoc => {
-            const task = tDoc.data();
-            const isChecked = finishedTaskIds.has(tDoc.id) ? "checked disabled" : "";
-            list.innerHTML += `
-                <div class="task-item">
-                    <label class="checkbox-container">
-                        <input type="checkbox" ${isChecked} onchange="tickTask('${tDoc.id}', '${task.name}')">
-                        ${task.name}
-                    </label>
-                    <button class="delete-btn" onclick="deleteTask('${tDoc.id}')">×</button>
-                </div>`;
-        });
-    });
+        // --- ANALYTICS ENGINE ---
+        async function runAnalytics() {
+            const perfContent = document.getElementById('performanceContent');
+            const heatmapContent = document.getElementById('heatmapContent');
+            
+            const compsSnap = await getDocs(collection(db, "completions"));
+            const usersSnap = await getDocs(collection(db, "users"));
+            
+            const taskStats = {};
+            const userActivity = {};
 
-    // 3. Leaderboard Listener
-    const qLeader = query(collection(db, "completions"), where("dateKey", "==", todayKey), orderBy("timestamp", "asc"));
-    onSnapshot(qLeader, (snap) => {
-        const list = document.getElementById('leaderList');
-        list.innerHTML = "";
-        snap.forEach(doc => {
-            const d = doc.data();
-            list.innerHTML += `<div class="leader-row">
-                <span><b>${d.userName}</b>: ${d.taskName}</span>
-                <span class="time-tag">${new Date(d.timestamp).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}</span>
-            </div>`;
-        });
-    });
-}
+            compsSnap.forEach(doc => {
+                const d = doc.data();
+                // Task Performance Logic
+                if (!taskStats[d.taskName]) taskStats[d.taskName] = { count: 0, totalMin: 0 };
+                const dt = new Date(d.timestamp);
+                taskStats[d.taskName].count++;
+                taskStats[d.taskName].totalMin += (dt.getHours() * 60) + dt.getMinutes();
 
-window.tickTask = async (taskId, taskName) => {
-    const now = new Date();
-    // 11:50 PM DEADLINE CHECK
-    if (now.getHours() === 23 && now.getMinutes() >= 50) {
-        alert("Window closed at 11:50 PM!");
-        location.reload(); // Reset checkbox
-        return;
-    }
+                // Heatmap Logic
+                if (!userActivity[d.userId]) userActivity[d.userId] = {};
+                userActivity[d.userId][d.dateKey] = true;
+            });
 
-    await addDoc(collection(db, "completions"), {
-        taskId,
-        taskName,
-        userId: currentUser.uid,
-        userName: currentUser.displayName,
-        timestamp: Date.now(),
-        dateKey: todayKey
-    });
-    alert("Task recorded!");
-    location.reload(); // Refresh to lock the checkbox
-};
+            // Render Task Performance
+            perfContent.innerHTML = "";
+            Object.entries(taskStats).forEach(([name, data]) => {
+                const avgMin = data.totalMin / data.count;
+                const hh = Math.floor(avgMin / 60);
+                const mm = Math.floor(avgMin % 60);
+                const timeStr = `${hh % 12 || 12}:${mm.toString().padStart(2, '0')} ${hh >= 12 ? 'PM' : 'AM'}`;
+                perfContent.innerHTML += `
+                    <div style="margin-bottom:15px">
+                        <div style="display:flex; justify-content:space-between; font-size:0.9rem">
+                            <span>${name}</span>
+                            <span>Avg: ${timeStr}</span>
+                        </div>
+                        <div class="perf-bar-bg"><div class="perf-bar-fill" style="width:${Math.min(data.count * 10, 100)}%"></div></div>
+                    </div>`;
+            });
+
+            // Render Heatmap (Last 7 Days)
+            let heatmapHtml = `<table class="heatmap-table"><tr><th>User</th>`;
+            const last7Days = [];
+            for(let i=6; i>=0; i--) {
+                const d = new Date(); d.setDate(d.getDate() - i);
+                const key = d.toISOString().split('T')[0];
+                last7Days.push(key);
+                heatmapHtml += `<th>${d.getDate()}</th>`;
+            }
+            heatmapHtml += `</tr>`;
+
+            usersSnap.forEach(uDoc => {
+                const user = uDoc.data();
+                heatmapHtml += `<tr><td>${user.displayName}</td>`;
+                last7Days.forEach(day => {
+                    const active = userActivity[user.uid] && userActivity[user.uid][day];
+                    heatmapHtml += `<td class="${active ? 'cell-active' : 'cell-inactive'}"></td>`;
+                });
+                heatmapHtml += `</tr>`;
+            });
+            heatmapContent.innerHTML = heatmapHtml + `</table>`;
+        }
     </script>
 </body>
 </html>
