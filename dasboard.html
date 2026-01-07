@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GBD | Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="logo">GBD.</div>
+        <ul class="nav-links">
+            <li class="active"><a href="dashboard.html"><i data-lucide="layout"></i><span>Tasks</span></a></li>
+            <li><a href="analytics.html"><i data-lucide="bar-chart-2"></i><span>Stats</span></a></li>
+            <li onclick="toggleTheme()"><i data-lucide="sun"></i><span>Theme</span></li>
+            <li onclick="handleLogout()" class="logout-link"><i data-lucide="log-out"></i><span>Exit</span></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <header class="header">
+            <h1>Architect Your Day</h1>
+            <div class="user-badge" id="userNameDisplay">Brother</div>
+        </header>
+
+        <section class="quick-stats">
+            <div class="card progress-card">
+                <h3>Daily Momentum</h3>
+                <div class="progress-container">
+                    <div id="myProgressFill" class="progress-fill"></div>
+                </div>
+                <span id="progressText">0% Complete</span>
+            </div>
+        </section>
+
+        <section class="creator-area card">
+            <input type="text" id="taskInput" placeholder="New Discipline..." class="ghost-input">
+            <div class="selector-row">
+                <div class="selectors">
+                    <select id="frequencyInput"><option value="once">One-time</option><option value="daily">Daily</option></select>
+                    <select id="pillarInput"><option>Spiritual</option><option>Intellectual</option><option>Character</option></select>
+                    <select id="priorityInput"><option value="normal">Normal</option><option value="high">High</option><option value="urgent">Urgent</option></select>
+                </div>
+                <button class="primary-btn" onclick="addTask()">Add Discipline</button>
+            </div>
+        </section>
+
+        <section id="masterTaskList" class="task-grid"></section>
+    </main>
+
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
