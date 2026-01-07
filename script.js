@@ -80,26 +80,65 @@ function renderTaskList(tasks) {
 
 // --- DATABASE ACTIONS ---
 // --- Updated Add Task ---
+// --- Updated Add Task with Frequency ---
 async function addTask() {
     const title = document.getElementById('taskInput').value;
     const pillar = document.getElementById('pillarInput').value;
-    const priority = document.getElementById('priorityInput').value; // New
+    const priority = document.getElementById('priorityInput').value;
+    const frequency = document.getElementById('frequencyInput').value;
+    
     if(!title) return;
 
     await db.collection("tasks").add({
         userId: auth.currentUser.uid,
         title, 
         pillar, 
-        priority, // New
+        priority,
+        frequency, // daily, weekly, or once
         done: false, 
+        lastCompleted: null, // Tracks when it was last checked
         createdAt: new Date()
     });
     
     document.getElementById('taskInput').value = '';
 }
 
+// --- The Reset Engine ---
+// Runs every time the app loads to refresh daily/weekly tasks
+async function runRecurrenceEngine(tasks) {
+    const now = new Date();
+    const todayStr = now.toDateString();
+
+    for (let task of tasks) {
+        if (task.frequency === 'daily' && task.done) {
+            // If the task was completed on a previous day, reset it
+            const lastUpdate = task.lastCompleted?.toDate().toDateString();
+            if (lastUpdate !== todayStr) {
+                await db.collection("tasks").doc(task.id).update({
+                    done: false,
+                    lastCompleted: null
+                });
+            }
+        }
+    }
+}
+
+// --- Updated Toggle Done ---
+async function toggleDone(id, currentStatus) {
+    const isDone = !currentStatus;
+    await db.collection("tasks").doc(id).update({ 
+        done: isDone,
+        lastCompleted: isDone ? new Date() : null 
+    });
+}
+
 // --- Updated Rendering ---
 function renderTaskList(tasks) {
+    // Inside your .map() function in renderTaskList:
+const recurrenceHtml = t.frequency !== 'once' ? 
+    `<div class="recurrence-badge"><i data-lucide="refresh-cw" size="10"></i> ${t.frequency}</div>` : '';
+
+// Add ${recurrenceHtml} under the task title in your template string.
     const list = document.getElementById('masterTaskList');
     list.innerHTML = tasks.map(t => {
         // Determine Flag Color Class
