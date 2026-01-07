@@ -6,60 +6,16 @@
     <title>GrowthByDesign | Login</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --accent: #00f2ff;
-            --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.1);
-        }
-
-        body { 
-            margin: 0; background: #05070a; color: white; 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            overflow: hidden; height: 100vh; 
-            display: flex; justify-content: center; align-items: center; 
-        }
-
-        /* Particles are now on TOP but transparent to clicks */
-        #canvas-container {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: 11; 
-            pointer-events: none; 
-        }
-
-        .auth-card { 
-            position: relative;
-            z-index: 10;
-            background: rgba(10, 12, 16, 0.8); 
-            padding: 50px 40px; 
-            border-radius: 32px; 
-            border: 1px solid var(--border); 
-            width: 360px; 
-            backdrop-filter: blur(20px);
-            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
-            transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
-        }
-
+        :root { --accent: #00f2ff; --border: rgba(255, 255, 255, 0.1); }
+        body { margin: 0; background: #05070a; color: white; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 11; pointer-events: none; }
+        .auth-card { position: relative; z-index: 10; background: rgba(10, 12, 16, 0.85); padding: 50px 40px; border-radius: 32px; border: 1px solid var(--border); width: 360px; backdrop-filter: blur(25px); box-shadow: 0 40px 100px rgba(0,0,0,0.8); transition: 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
         h2 { margin-bottom: 25px; font-weight: 800; letter-spacing: -2px; font-size: 2rem; }
-        input { 
-            width: 100%; padding: 14px; margin: 8px 0; 
-            border-radius: 12px; border: 1px solid #222; 
-            background: rgba(0,0,0,0.6); color: white; 
-            box-sizing: border-box; outline: none; transition: 0.3s;
-        }
+        input { width: 100%; padding: 14px; margin: 8px 0; border-radius: 12px; border: 1px solid #222; background: rgba(0,0,0,0.6); color: white; outline: none; transition: 0.3s; }
         input:focus { border-color: var(--accent); box-shadow: 0 0 15px rgba(0, 242, 255, 0.2); }
-
-        button { 
-            width: 100%; padding: 14px; border-radius: 12px; 
-            border: none; background: var(--accent); 
-            color: #000; font-weight: 800; cursor: pointer; 
-            margin-top: 20px; transition: 0.3s; 
-        }
+        button { width: 100%; padding: 14px; border-radius: 12px; border: none; background: var(--accent); color: #000; font-weight: 800; cursor: pointer; margin-top: 20px; transition: 0.3s; }
         button:hover { background: white; transform: translateY(-3px); }
-
         .toggle { font-size: 0.85rem; margin-top: 25px; cursor: pointer; color: #888; text-align: center; }
-        
         #signup-fields { transition: 0.4s; overflow: hidden; }
         .hidden { max-height: 0; opacity: 0; pointer-events: none; }
         .visible { max-height: 100px; opacity: 1; pointer-events: all; }
@@ -72,7 +28,7 @@
     <div class="auth-card" id="auth-card">
         <h2 id="title">GBD Login</h2>
         <div id="signup-fields" class="hidden">
-            <input type="text" id="username" placeholder="Your Elite Callsign">
+            <input type="text" id="username" placeholder="Your GBD Name">
         </div>
         <div class="input-group">
             <input type="email" id="email" placeholder="Email Address">
@@ -97,7 +53,7 @@
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
         import { getFirestore, doc, setDoc } from "firebase/firestore";
 
-        // --- FIREBASE CONFIG ---
+        // --- FIREBASE CONFIG (Your Provided Keys) ---
         const firebaseConfig = {
             apiKey: "AIzaSyCu03ePMFx9mDgbCdT9LWcoPOg2SGQIBEU",
             authDomain: "growthbydesign-2a6d0.firebaseapp.com",
@@ -106,7 +62,6 @@
             messagingSenderId: "807311473882",
             appId: "1:807311473882:web:49300d2d84355eb4cbb9e3"
         };
-
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
@@ -119,39 +74,67 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         container.appendChild(renderer.domElement);
 
-        const particleCount = 5000;
+        const particleCount = 6000;
         const positions = new Float32Array(particleCount * 3);
         const targetPositions = new Float32Array(particleCount * 3);
         const geometry = new THREE.BufferGeometry();
         const material = new THREE.PointsMaterial({
-            size: 0.025, color: 0x00f2ff, transparent: true, blending: THREE.AdditiveBlending, opacity: 0.8
+            size: 0.028, color: 0x00f2ff, transparent: true, blending: THREE.AdditiveBlending, opacity: 0.8
         });
 
         const points = new THREE.Points(geometry, material);
         scene.add(points);
-        camera.position.z = 5;
+        camera.position.z = 6;
+
+        // --- TEXT TO PARTICLES LOGIC ---
+        const createText = (text, arr) => {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 400; canvas.height = 100;
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 60px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(text, 200, 70);
+            
+            const data = ctx.getImageData(0, 0, 400, 100).data;
+            const pointsList = [];
+            for (let y = 0; y < 100; y += 2) {
+                for (let x = 0; x < 400; x += 2) {
+                    if (data[(y * 400 + x) * 4] > 128) {
+                        pointsList.push({ x: (x - 200) / 40, y: (50 - y) / 40 });
+                    }
+                }
+            }
+
+            for (let i = 0; i < particleCount; i++) {
+                const pt = pointsList[i % pointsList.length];
+                arr[i * 3] = pt.x + (Math.random() - 0.5) * 0.1;
+                arr[i * 3 + 1] = pt.y + (Math.random() - 0.5) * 0.1;
+                arr[i * 3 + 2] = (Math.random() - 0.5) * 0.5;
+            }
+        };
 
         const createSphere = (arr) => {
             for(let i=0; i<particleCount; i++){
                 const phi = Math.acos(-1 + (2 * i) / particleCount);
                 const theta = Math.sqrt(particleCount * Math.PI) * phi;
-                arr[i*3] = 2.5 * Math.cos(theta) * Math.sin(phi);
-                arr[i*3+1] = 2.5 * Math.sin(theta) * Math.sin(phi);
-                arr[i*3+2] = 2.5 * Math.cos(phi);
+                arr[i*3] = 3 * Math.cos(theta) * Math.sin(phi);
+                arr[i*3+1] = 3 * Math.sin(theta) * Math.sin(phi);
+                arr[i*3+2] = 3 * Math.cos(phi);
             }
         };
 
         const createSaturn = (arr) => {
             for(let i=0; i<particleCount; i++){
                 if(i < particleCount * 0.5) {
-                    const r = 1.8;
+                    const r = 2.0;
                     const phi = Math.random() * Math.PI * 2;
                     const theta = Math.random() * Math.PI;
                     arr[i*3] = r * Math.sin(theta) * Math.cos(phi);
                     arr[i*3+1] = r * Math.sin(theta) * Math.sin(phi);
                     arr[i*3+2] = r * Math.cos(theta);
                 } else {
-                    const r = 3.0 + Math.random() * 1.5;
+                    const r = 3.5 + Math.random() * 2;
                     const phi = Math.random() * Math.PI * 2;
                     arr[i*3] = r * Math.cos(phi);
                     arr[i*3+1] = (Math.random() - 0.5) * 0.2;
@@ -160,9 +143,14 @@
             }
         };
 
-        createSphere(positions);
-        createSphere(targetPositions);
+        // Initialize with Text
+        createText("GROWTH", targetPositions);
+        // Scramble initial positions
+        for(let i=0; i<particleCount*3; i++) positions[i] = (Math.random()-0.5)*20;
         geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+
+        // Wait 2 seconds then turn into Sphere
+        setTimeout(() => createSphere(targetPositions), 2500);
 
         let mouseX = 0, mouseY = 0;
         document.addEventListener('mousemove', (e) => {
@@ -184,13 +172,12 @@
         }
         animate();
 
-        // --- INTERACTION LOGIC ---
+        // --- AUTH & TOGGLE ---
         let isLogin = true;
         window.toggleMode = () => {
             isLogin = !isLogin;
             document.getElementById('title').innerText = isLogin ? 'GBD Login' : 'Join GBD';
             document.getElementById('signup-fields').className = isLogin ? 'hidden' : 'visible';
-            document.getElementById('toggleText').innerText = isLogin ? 'New to GBD? Create an Account' : 'Have an account? Login';
             isLogin ? createSphere(targetPositions) : createSaturn(targetPositions);
             material.color.setHex(isLogin ? 0x00f2ff : 0xff00ff);
         };
@@ -201,8 +188,8 @@
             const name = document.getElementById('username').value;
             const btn = document.getElementById('auth-btn');
 
-            if(!email || !password) return alert("Please fill in all fields.");
-            btn.innerText = "Verifying...";
+            if(!email || !password) return alert("Fields required.");
+            btn.innerText = "Authenticating...";
             btn.disabled = true;
 
             try {
@@ -211,20 +198,14 @@
                 } else {
                     const res = await createUserWithEmailAndPassword(auth, email, password);
                     await updateProfile(res.user, { displayName: name });
-                    await setDoc(doc(db, "users", res.user.uid), {
-                        uid: res.user.uid, displayName: name, email: email, joinedAt: Date.now()
-                    });
+                    await setDoc(doc(db, "users", res.user.uid), { uid: res.user.uid, displayName: name, email, joinedAt: Date.now() });
                 }
                 
-                // Supernova Transition
-                for(let i=0; i<particleCount; i++){
-                    targetPositions[i*3] *= 12;
-                    targetPositions[i*3+1] *= 12;
-                    targetPositions[i*3+2] = 15;
-                }
+                // Explode to Success Text
+                createText("WELCOME", targetPositions);
+                for(let i=0; i<particleCount; i++) targetPositions[i*3+2] += 5; // Move closer
                 document.getElementById('auth-card').style.opacity = '0';
-                setTimeout(() => window.location.href = 'app/app.html', 1000);
-
+                setTimeout(() => window.location.href = 'app/app.html', 1500);
             } catch (err) {
                 alert(err.message);
                 btn.innerText = "Authorize";
