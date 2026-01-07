@@ -2,53 +2,69 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GBD | The Entry</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>GrowthByDesign | Login</title>
+    <style>
+        body { background: #05070a; color: white; font-family: 'Inter', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .auth-card { background: rgba(255,255,255,0.05); padding: 40px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.1); width: 320px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        h2 { margin-bottom: 20px; font-weight: 800; letter-spacing: -1px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border-radius: 8px; border: 1px solid #333; background: #111; color: white; box-sizing: border-box; outline: none; }
+        input:focus { border-color: #00f2ff; }
+        button { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #00f2ff; font-weight: bold; cursor: pointer; margin-top: 15px; transition: 0.2s; }
+        button:hover { background: #00d8e4; transform: translateY(-2px); }
+        .toggle { font-size: 0.8rem; margin-top: 20px; cursor: pointer; color: #888; text-align: center; }
+    </style>
 </head>
-<body class="auth-page">
-
-    <div class="auth-wrapper" id="authWrapper">
-        <div class="background-shape"></div>
-        
-        <div class="credentials-panel signin">
-            <h2 class="slide-element">Log In</h2>
-            <div class="field-wrapper slide-element">
-                <input type="email" id="loginEmail" required placeholder=" ">
-                <label>Email</label>
-            </div>
-            <div class="field-wrapper slide-element">
-                <input type="password" id="loginPass" required placeholder=" ">
-                <label>Password</label>
-            </div>
-            <button class="submit-button slide-element" id="loginBtn">Enter Design</button>
-            <p class="switch-link slide-element">New Brother? <a href="#" onclick="toggleAuth()">Join the Covenant</a></p>
+<body>
+    <div class="auth-card">
+        <h2 id="title">Sprint Login</h2>
+        <div id="signup-fields">
+            <input type="text" id="username" placeholder="Display Name">
         </div>
-
-        <div class="credentials-panel signup">
-            <h2>The Covenant</h2>
-            <div class="field-wrapper">
-                <input type="text" id="regName" required placeholder=" ">
-                <label>Full Name</label>
-            </div>
-            <div class="field-wrapper">
-                <input type="email" id="regEmail" required placeholder=" ">
-                <label>Email</label>
-            </div>
-            <div class="field-wrapper">
-                <input type="password" id="regPass" required placeholder=" ">
-                <label>Password</label>
-            </div>
-            <button class="submit-button" id="signUpBtn">Sign & Join</button>
-            <p class="switch-link">Already a member? <a href="#" onclick="toggleAuth()">Login</a></p>
-        </div>
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="handleAuth()">Continue</button>
+        <div class="toggle" id="toggleText" onclick="toggleMode()">New here? Create an account</div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    
-    <script src="script.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCu03ePMFx9mDgbCdT9LWcoPOg2SGQIBEU",
+            authDomain: "growthbydesign-2a6d0.firebaseapp.com",
+            projectId: "growthbydesign-2a6d0",
+            storageBucket: "growthbydesign-2a6d0.firebasestorage.app",
+            messagingSenderId: "807311473882",
+            appId: "1:807311473882:web:49300d2d84355eb4cbb9e3"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        let isLogin = true;
+        document.getElementById('signup-fields').style.display = 'none';
+
+        window.toggleMode = () => {
+            isLogin = !isLogin;
+            document.getElementById('title').innerText = isLogin ? 'Sprint Login' : 'Join Sprint';
+            document.getElementById('signup-fields').style.display = isLogin ? 'none' : 'block';
+            document.getElementById('toggleText').innerText = isLogin ? 'New here? Create an account' : 'Have an account? Login';
+        };
+
+        window.handleAuth = async () => {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            try {
+                if (isLogin) {
+                    await signInWithEmailAndPassword(auth, email, password);
+                } else {
+                    const name = document.getElementById('username').value;
+                    const res = await createUserWithEmailAndPassword(auth, email, password);
+                    await updateProfile(res.user, { displayName: name });
+                }
+                window.location.href = '/app/app.html';
+            } catch (err) { alert(err.message); }
+        };
+    </script>
 </body>
 </html>
