@@ -8,136 +8,160 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --bg: #0a0c10;
-            --surface: #161a22;
-            --surface-hover: #1c212c;
+            --bg: #05070a;
+            --surface: rgba(22, 26, 34, 0.7);
+            --surface-hover: rgba(28, 33, 44, 0.9);
             --accent: #6366f1; 
             --success: #10b981;
             --danger: #ef4444;
-            --warning: #f59e0b;
             --text-main: #f3f4f6;
             --text-dim: #9ca3af;
             --glass-border: rgba(255, 255, 255, 0.08);
-            --gold: radial-gradient(circle, #fde68a 0%, #d97706 100%);
-            --silver: radial-gradient(circle, #f1f5f9 0%, #475569 100%);
-            --bronze: radial-gradient(circle, #fed7aa 0%, #9a3412 100%);
+            --gold: linear-gradient(135deg, #fde68a 0%, #d97706 100%);
+            --cyber-glow: 0 0 20px rgba(99, 102, 241, 0.2);
         }
 
         body { 
             margin: 0; background: var(--bg); color: var(--text-main); 
             font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-image: radial-gradient(circle at 50% -20%, #1e2235 0%, #0a0c10 100%);
+            background-image: 
+                linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+                radial-gradient(circle at 50% -20%, #1e2235 0%, #05070a 100%);
+            background-size: 40px 40px, 40px 40px, 100% 100%;
             min-height: 100vh; overflow-x: hidden;
         }
         
         nav { 
-            display: flex; justify-content: center; padding: 20px; 
+            display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; 
             position: sticky; top: 0; backdrop-filter: blur(20px); 
-            background: rgba(10, 12, 16, 0.7); border-bottom: 1px solid var(--glass-border); z-index: 100; 
+            background: rgba(5, 7, 10, 0.8); border-bottom: 1px solid var(--glass-border); z-index: 100; 
         }
+
+        .nav-links { display: flex; gap: 10px; }
+
         nav button { 
             background: none; border: none; color: var(--text-dim); 
-            margin: 0 15px; cursor: pointer; font-weight: 600; 
-            font-size: 0.85rem; letter-spacing: 1px; transition: 0.3s; 
+            padding: 8px 16px; cursor: pointer; font-weight: 700; 
+            font-size: 0.75rem; letter-spacing: 1px; transition: 0.3s; border-radius: 8px;
         }
-        nav button.active { color: var(--accent); border-bottom: 2px solid var(--accent); }
+        nav button.active { color: var(--text-main); background: rgba(255,255,255,0.05); box-shadow: var(--cyber-glow); }
+        nav button:hover:not(.active) { color: var(--accent); }
 
-        .container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
-        .view { display: none; animation: slideUp 0.4s ease-out; }
+        .container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
+        .view { display: none; animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
         .view.active { display: block; }
 
-        @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         .card { 
             background: var(--surface); border: 1px solid var(--glass-border); 
             border-radius: 24px; padding: 28px; margin-bottom: 24px;
+            backdrop-filter: blur(10px); transition: 0.3s;
         }
+        .card:hover { border-color: rgba(99, 102, 241, 0.4); transform: translateY(-2px); }
 
         /* Leaderboard Styling */
         .rank-row { 
-            display: flex; align-items: center; padding: 20px; 
-            background: rgba(255,255,255,0.02); border-radius: 16px; margin-bottom: 12px;
-            transition: 0.3s;
+            display: flex; align-items: center; padding: 16px; 
+            background: rgba(255,255,255,0.03); border-radius: 20px; margin-bottom: 12px;
+            border: 1px solid transparent; transition: 0.3s;
         }
-        .rank-medal { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; margin-right: 20px; color: #000; }
-        .rank-1 { background: var(--gold); box-shadow: 0 0 20px rgba(217, 119, 6, 0.4); }
-        .rank-2 { background: var(--silver); }
-        .rank-3 { background: var(--bronze); }
+        .rank-row:hover { background: rgba(255,255,255,0.06); border-color: var(--glass-border); }
 
-        /* Collapsible Styling */
-        .collapse-header { cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .collapse-content { display: none; margin-top: 20px; border-top: 1px solid var(--glass-border); }
-        .collapse-content.open { display: block; }
-
-        /* Reach Out Alert */
-        .reach-out-badge { 
-            background: rgba(239, 68, 68, 0.1); color: var(--danger); 
-            padding: 4px 10px; border-radius: 6px; font-size: 0.65rem; font-weight: 800;
-            border: 1px solid var(--danger); animation: pulse 2s infinite;
+        .rank-medal { 
+            width: 44px; height: 44px; border-radius: 14px; display: flex; 
+            align-items: center; justify-content: center; font-weight: 800; 
+            margin-right: 20px; font-size: 1.1rem;
         }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+        .rank-1 { background: var(--gold); color: #431407; box-shadow: 0 10px 20px rgba(217, 119, 6, 0.3); }
 
-        /* Sunday Modal */
+        /* Directives */
+        .task-item {
+            background: rgba(255,255,255,0.02); padding: 18px; border-radius: 16px;
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 12px; border: 1px solid var(--glass-border);
+        }
+
+        .check-btn {
+            width: 28px; height: 28px; border-radius: 8px; border: 2px solid var(--glass-border);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: 0.3s; font-size: 14px;
+        }
+        .check-btn.done { background: var(--success); border-color: var(--success); color: white; }
+
+        /* Heatmap */
+        .mini-heatmap { display: flex; gap: 6px; margin-top: 12px; }
+        .day-box { flex: 1; height: 12px; border-radius: 3px; background: rgba(255,255,255,0.05); position: relative; }
+        .day-box.active { background: var(--success); box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
+
+        /* Victory Overlay */
         #victoryOverlay {
-            position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000;
+            position: fixed; inset: 0; background: rgba(5,7,10,0.95); z-index: 2000;
             display: none; flex-direction: column; align-items: center; justify-content: center;
-            text-align: center; backdrop-filter: blur(10px);
+            text-align: center; backdrop-filter: blur(15px);
         }
 
-        .mini-heatmap { display: flex; gap: 4px; margin-top: 8px; }
-        .day-box { flex: 1; height: 10px; border-radius: 2px; background: rgba(255,255,255,0.05); }
-        .day-box.active { background: var(--success); box-shadow: 0 0 5px var(--success); }
+        .btn-primary { 
+            background: var(--accent); color: white; border: none; padding: 14px 28px; 
+            border-radius: 14px; font-weight: 800; cursor: pointer; transition: 0.3s;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+        .btn-primary:hover { transform: scale(1.05); background: white; color: var(--bg); }
 
-        .btn-primary { background: var(--accent); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer; }
-        .input-group { display: flex; gap: 12px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 16px; border: 1px solid var(--glass-border); margin-bottom: 32px; }
-        input[type="text"] { background: none; border: none; padding: 12px; color: white; flex: 1; outline: none; }
+        .input-group { 
+            display: flex; gap: 12px; background: rgba(0,0,0,0.3); padding: 10px; 
+            border-radius: 18px; border: 1px solid var(--glass-border); margin-bottom: 32px; 
+        }
+        input[type="text"] { background: none; border: none; padding: 12px; color: white; flex: 1; outline: none; font-family: inherit; }
+        
+        h2 { font-weight: 800; letter-spacing: -1px; margin-bottom: 24px; }
     </style>
 </head>
 <body>
 
     <div id="victoryOverlay">
-        <h1 style="font-size: 3rem; margin: 0; background: var(--gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">SUNDAY VICTORY</h1>
+        <h1 style="font-size: 3.5rem; font-weight: 900; margin: 0; background: var(--gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">SUNDAY VICTORY</h1>
+        <p style="color: var(--text-dim); margin-bottom: 20px;">Top Contributors of the Week</p>
         <div id="winnerList" style="margin: 30px 0;"></div>
-        <button class="btn-primary" onclick="closeVictory()">Dismiss</button>
+        <button class="btn-primary" onclick="closeVictory()">Enter Dashboard</button>
     </div>
 
-    <nav id="main-nav">
-        <button onclick="showView('tasks-view')" id="nav-tasks" class="active">DIRECTIVES</button>
-        <button onclick="showView('leader-view')" id="nav-leader">LEADERBOARD</button>
-        <button onclick="showView('analytics-view')" id="nav-analytics">INTELLIGENCE</button>
-        <button onclick="logout()" style="color: var(--danger);">LOGOUT</button>
+    <nav>
+        <div style="font-weight: 800; font-size: 1.2rem; color: var(--accent);">GBD</div>
+        <div class="nav-links">
+            <button onclick="showView('tasks-view')" id="nav-tasks" class="active">DIRECTIVES</button>
+            <button onclick="showView('leader-view')" id="nav-leader">LEADERBOARD</button>
+            <button onclick="showView('analytics-view')" id="nav-analytics">INTELLIGENCE</button>
+        </div>
+        <button onclick="logout()" style="color: var(--danger); background: rgba(239, 68, 68, 0.1);">EXIT</button>
     </nav>
 
     <div class="container">
         <section id="tasks-view" class="view active">
-            <div class="section-header"><h2>Shared Objectives</h2></div>
+            <h2>Shared Objectives</h2>
             <div class="input-group">
                 <input type="text" id="newTask" placeholder="Add team target...">
                 <button onclick="addSharedTask()" class="btn-primary">Deploy</button>
             </div>
-            <div id="taskList" class="task-list"></div>
+            <div id="taskList"></div>
         </section>
 
         <section id="leader-view" class="view">
-            <div class="section-header"><h2>Elite Standings</h2></div>
+            <h2>Elite Standings</h2>
             <div id="leaderboardContent"></div>
         </section>
 
         <section id="analytics-view" class="view">
-            <div class="section-header">
-                <h2>Member Consistency</h2>
-                <div class="filter-group">
-                    <button class="filter-btn active" id="btn-7" onclick="updateFilter(7)">7D</button>
-                    <button class="filter-btn" id="btn-30" onclick="updateFilter(30)">30D</button>
-                </div>
-            </div>
+            <h2>Consistency Metrics</h2>
+            <p style="color: var(--text-dim); font-size: 0.8rem; margin-top: -20px; margin-bottom: 30px;">Activity tracked over the last 7 cycles</p>
             <div id="intelligenceContent"></div>
         </section>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, getDocs, setDoc, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, where, orderBy, getDocs, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
 
         const firebaseConfig = {
@@ -154,12 +178,13 @@
         const auth = getAuth(app);
 
         let currentUser = null;
-        let currentFilterDays = 7;
         const todayKey = new Date().toISOString().split('T')[0];
 
         onAuthStateChanged(auth, async (user) => {
-            if (!user) window.location.href = '/index.html';
-            else { 
+            if (!user) {
+                // Modified Logout Redirect
+                window.location.href = '../index.html'; 
+            } else { 
                 currentUser = user; 
                 await setDoc(doc(db, "users", user.uid), { uid: user.uid, email: user.email }, { merge: true });
                 initApp(); 
@@ -172,22 +197,11 @@
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(id).classList.add('active');
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-            document.getElementById('nav-' + id.split('-')[0]).classList.add('active');
+            const navId = 'nav-' + id.split('-')[0];
+            if(document.getElementById(navId)) document.getElementById(navId).classList.add('active');
             if(id === 'analytics-view' || id === 'leader-view') refreshAll();
         };
 
-        window.toggleCollapse = (id) => {
-            document.getElementById(id).classList.toggle('open');
-        };
-
-        window.updateFilter = (days) => {
-            currentFilterDays = days;
-            document.getElementById('btn-7').classList.toggle('active', days === 7);
-            document.getElementById('btn-30').classList.toggle('active', days === 30);
-            refreshAll();
-        };
-
-        // Standard Actions
         window.addSharedTask = async () => {
             const name = document.getElementById('newTask').value;
             if(!name) return;
@@ -201,30 +215,29 @@
                 userName: currentUser.displayName || currentUser.email.split('@')[0],
                 timestamp: Date.now(), dateKey: todayKey
             });
-            location.reload();
+            refreshAll();
         };
 
         window.closeVictory = () => { document.getElementById('victoryOverlay').style.display = 'none'; };
 
         async function initApp() {
             // Task loading
-            const compsSnap = await getDocs(query(collection(db, "completions"), where("userId", "==", currentUser.uid), where("dateKey", "==", todayKey)));
-            const finishedIds = new Set();
-            compsSnap.forEach(d => finishedIds.add(d.data().taskId));
+            onSnapshot(query(collection(db, "sharedTasks"), orderBy("createdAt", "asc")), async (snap) => {
+                const compsSnap = await getDocs(query(collection(db, "completions"), where("userId", "==", currentUser.uid), where("dateKey", "==", todayKey)));
+                const finishedIds = new Set();
+                compsSnap.forEach(d => finishedIds.add(d.data().taskId));
 
-            onSnapshot(query(collection(db, "sharedTasks"), orderBy("createdAt", "asc")), (snap) => {
                 const list = document.getElementById('taskList');
                 list.innerHTML = "";
                 snap.forEach(tDoc => {
                     const task = tDoc.data();
                     const isDone = finishedIds.has(tDoc.id);
                     list.innerHTML += `
-                    <div class="card" style="padding:15px; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                        <div style="display:flex; align-items:center; gap:15px;">
-                            <div onclick="${isDone ? '' : `tickTask('${tDoc.id}', '${task.name}')`}" style="width:24px; height:24px; border:2px solid ${isDone ? 'var(--success)' : 'var(--glass-border)'}; border-radius:6px; cursor:pointer; display:flex; align-items:center; justify-content:center;">
-                                ${isDone ? '✓' : ''}
-                            </div>
-                            <span style="${isDone ? 'text-decoration:line-through; color:var(--text-dim)' : ''}">${task.name}</span>
+                    <div class="task-item">
+                        <span style="${isDone ? 'text-decoration:line-through; color:var(--text-dim)' : 'font-weight:600'}">${task.name}</span>
+                        <div onclick="${isDone ? '' : `tickTask('${tDoc.id}', '${task.name}')`}" 
+                             class="check-btn ${isDone ? 'done' : ''}">
+                            ${isDone ? '✓' : ''}
                         </div>
                     </div>`;
                 });
@@ -242,50 +255,43 @@
             tasksSnap.forEach(t => allTasks.push({id: t.id, name: t.data().name}));
 
             const userActivity = {};
-            const filterMs = Date.now() - (currentFilterDays * 24 * 60 * 60 * 1000);
-
             compsSnap.forEach(doc => {
                 const d = doc.data();
-                if (!userActivity[d.userId]) userActivity[d.userId] = { name: d.userName, taskDates: {}, totalAllTime: 0, periodCount: 0 };
+                if (!userActivity[d.userId]) userActivity[d.userId] = { name: d.userName, taskDates: {}, totalAllTime: 0 };
                 if (!userActivity[d.userId].taskDates[d.taskId]) userActivity[d.userId].taskDates[d.taskId] = new Set();
-                
                 userActivity[d.userId].taskDates[d.taskId].add(d.dateKey);
                 userActivity[d.userId].totalAllTime++;
-                if(d.timestamp >= filterMs) userActivity[d.userId].periodCount++;
             });
 
-            renderLeaderboard(usersSnap, userActivity);
-            renderIntelligence(usersSnap, userActivity, allTasks);
+            renderLeaderboard(userActivity);
+            renderIntelligence(userActivity, allTasks);
         }
 
-        function renderLeaderboard(usersSnap, activity) {
+        function renderLeaderboard(activity) {
             const container = document.getElementById('leaderboardContent');
             const sorted = Object.entries(activity).sort((a,b) => b[1].totalAllTime - a[1].totalAllTime);
             
             container.innerHTML = sorted.map(([uid, data], i) => {
                 const rank = i + 1;
-                const medalClass = rank <= 3 ? `rank-${rank}` : '';
-                const trophy = rank === 1 ? '🏆' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
-                
+                const trophy = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : `#${rank}`;
                 return `
                 <div class="rank-row">
-                    <div class="rank-medal ${medalClass}">${trophy}</div>
+                    <div class="rank-medal ${rank === 1 ? 'rank-1' : ''}">${trophy}</div>
                     <div style="flex:1">
-                        <div style="font-weight:800">${data.name}</div>
-                        <div style="font-size:0.7rem; color:var(--text-dim)">Total Objectives Cleared</div>
+                        <div style="font-weight:800; font-size:1rem;">${data.name}</div>
+                        <div style="font-size:0.7rem; color:var(--text-dim)">Global Objective Score</div>
                     </div>
-                    <div style="font-size:1.5rem; font-weight:800; color:var(--accent)">${data.totalAllTime}</div>
+                    <div style="font-size:1.4rem; font-weight:900; color:var(--accent)">${data.totalAllTime}</div>
                 </div>`;
             }).join('');
         }
 
-        function renderIntelligence(usersSnap, activity, allTasks) {
+        function renderIntelligence(activity, allTasks) {
             const container = document.getElementById('intelligenceContent');
-            const days = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
             const last7 = [];
             for(let i=6; i>=0; i--) {
                 const d = new Date(); d.setDate(d.getDate() - i);
-                last7.push({key: d.toISOString().split('T')[0], label: days[d.getDay()]});
+                last7.push(d.toISOString().split('T')[0]);
             }
 
             let html = "";
@@ -293,24 +299,15 @@
                 let taskHtml = "";
                 allTasks.forEach(task => {
                     const dates = data.taskDates[task.id] || new Set();
-                    const missedCount = 7 - Array.from(dates).filter(k => {
-                        const date = new Date(k);
-                        return (Date.now() - date.getTime()) <= (7 * 24 * 60 * 60 * 1000);
-                    }).length;
-
-                    // Red Flag: missed more than 2 times in 7 days
-                    const needsReachOut = missedCount > 2;
-
                     let boxes = "";
                     last7.forEach(day => {
-                        boxes += `<div class="day-box ${dates.has(day.key) ? 'active' : ''}"></div>`;
+                        boxes += `<div class="day-box ${dates.has(day) ? 'active' : ''}"></div>`;
                     });
 
                     taskHtml += `
-                    <div style="margin-top:20px; padding-bottom:10px; border-bottom:1px solid rgba(255,255,255,0.03)">
-                        <div style="display:flex; justify-content:space-between; align-items:center">
-                            <span style="font-size:0.85rem; font-weight:600">${task.name}</span>
-                            ${needsReachOut ? `<span class="reach-out-badge">REACH OUT</span>` : ''}
+                    <div style="margin-top:20px;">
+                        <div style="font-size:0.8rem; font-weight:700; margin-bottom:8px; display:flex; justify-content:space-between;">
+                            ${task.name}
                         </div>
                         <div class="mini-heatmap">${boxes}</div>
                     </div>`;
@@ -318,16 +315,8 @@
 
                 html += `
                 <div class="card">
-                    <div class="collapse-header" onclick="toggleCollapse('col-${uid}')">
-                        <div>
-                            <div style="font-weight:800; font-size:1.1rem;">${data.name}</div>
-                            <div style="font-size:0.75rem; color:var(--text-dim)">Click to expand metrics</div>
-                        </div>
-                        <span style="color:var(--accent)">+</span>
-                    </div>
-                    <div class="collapse-content" id="col-${uid}">
-                        ${taskHtml}
-                    </div>
+                    <div style="font-weight:900; font-size:1.2rem; color:var(--accent); margin-bottom:10px;">${data.name}</div>
+                    ${taskHtml}
                 </div>`;
             });
             container.innerHTML = html;
@@ -335,7 +324,7 @@
 
         async function checkSundayCelebration() {
             const now = new Date();
-            if(now.getDay() === 0) { // Sunday
+            if(now.getDay() === 0) { 
                 const compsSnap = await getDocs(collection(db, "completions"));
                 const activity = {};
                 compsSnap.forEach(doc => {
@@ -350,21 +339,17 @@
                     const list = document.getElementById('winnerList');
                     overlay.style.display = 'flex';
                     list.innerHTML = sorted.map((u, i) => `
-                        <div style="margin: 10px; font-size: 1.5rem;">
-                            ${i==0?'🥇':i==1?'🥈':'🥉'} ${u.name} — ${u.count} Tasks
+                        <div style="margin: 15px; font-size: 1.5rem; font-weight:800;">
+                            ${u.name} — <span style="color:var(--accent)">${u.count}</span>
                         </div>
                     `).join('');
 
-                    // Trigger Confetti
-                    const duration = 15 * 1000;
+                    const duration = 5 * 1000;
                     const animationEnd = Date.now() + duration;
-                    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 3000 };
-
                     const interval = setInterval(function() {
                         const timeLeft = animationEnd - Date.now();
                         if (timeLeft <= 0) return clearInterval(interval);
-                        const particleCount = 50 * (timeLeft / duration);
-                        confetti({ ...defaults, particleCount, origin: { x: Math.random(), y: Math.random() - 0.2 }, colors: ['#fde68a', '#d97706'] });
+                        confetti({ particleCount: 40, spread: 70, origin: { y: 0.6 }, colors: ['#6366f1', '#fde68a'] });
                     }, 250);
                 }
             }
