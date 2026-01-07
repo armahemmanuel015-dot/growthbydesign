@@ -47,7 +47,6 @@
 
         @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Profile Header */
         .profile-header {
             display: flex; align-items: center; justify-content: space-between;
             background: var(--surface); padding: 20px; border-radius: 24px;
@@ -59,11 +58,10 @@
             color: #000; display: flex; align-items: center; justify-content: center; font-weight: 800;
         }
 
-        /* Task Items */
         .task-item {
             background: rgba(255,255,255,0.02); padding: 18px; border-radius: 16px;
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 12px; border: 1px solid var(--glass-border); position: relative;
+            margin-bottom: 12px; border: 1px solid var(--glass-border);
         }
         .task-content { display: flex; align-items: center; gap: 15px; flex: 1; }
         
@@ -73,27 +71,20 @@
         }
         .check-btn.done { background: var(--success); border-color: var(--success); color: white; }
 
-        /* Task Actions */
-        .task-actions { display: flex; gap: 10px; align-items: center; }
-        .action-icon { 
-            cursor: pointer; font-size: 0.8rem; color: var(--text-dim); 
-            padding: 5px; border-radius: 5px; transition: 0.2s;
-        }
-        .action-icon:hover { color: var(--accent); background: rgba(255,255,255,0.05); }
-        .action-icon.del:hover { color: var(--danger); }
+        .task-actions { display: flex; gap: 10px; }
+        .action-btn { cursor: pointer; opacity: 0.5; transition: 0.3s; font-size: 0.9rem; }
+        .action-btn:hover { opacity: 1; color: var(--accent); }
 
-        /* Leaderboard & Intel */
         .card { background: var(--surface); border: 1px solid var(--glass-border); border-radius: 24px; padding: 25px; margin-bottom: 20px; }
         .collapse-header { cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .collapse-content { max-height: 0; opacity: 0; overflow: hidden; transition: 0.4s; }
-        .collapse-content.open { max-height: 1000px; opacity: 1; padding-top: 20px; margin-top: 15px; border-top: 1px solid var(--glass-border); }
+        .collapse-content.open { max-height: 1000px; opacity: 1; padding-top: 20px; border-top: 1px solid var(--glass-border); margin-top: 15px; }
 
         .mini-heatmap { display: flex; gap: 4px; margin-top: 8px; }
         .day-box { flex: 1; height: 8px; border-radius: 2px; background: rgba(255,255,255,0.05); }
         .day-box.active { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
 
         .rank-row { display: flex; align-items: center; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 18px; margin-bottom: 10px; }
-        .rank-num { width: 35px; font-weight: 800; color: var(--accent); }
         
         .input-group { display: flex; gap: 10px; margin-bottom: 30px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 15px; border: 1px solid var(--glass-border); }
         input { background: none; border: none; color: white; flex: 1; padding: 10px; outline: none; font-family: inherit; }
@@ -103,7 +94,7 @@
 <body>
 
     <nav>
-        <div style="font-weight: 800; color: var(--accent); letter-spacing: -1px;">GBD ELITE</div>
+        <div style="font-weight: 800; color: var(--accent);">GBD ELITE</div>
         <div class="nav-links">
             <button onclick="showView('tasks-view')" id="nav-tasks" class="active">DIRECTIVES</button>
             <button onclick="showView('leader-view')" id="nav-leader">LEADERBOARD</button>
@@ -118,30 +109,30 @@
                 <div class="avatar" id="userAvatar">?</div>
                 <div>
                     <div id="userDisplay" style="font-weight: 800; font-size: 1.1rem;">Loading...</div>
-                    <div style="font-size: 0.7rem; color: var(--text-dim);">Identity Verified</div>
+                    <div style="font-size: 0.7rem; color: var(--text-dim);">Status: Authenticated</div>
                 </div>
             </div>
             <div style="text-align: right;">
                 <div id="myPoints" style="font-size: 1.5rem; font-weight: 900; color: var(--accent);">0</div>
-                <div style="font-size: 0.6rem; color: var(--text-dim); text-transform: uppercase;">Points Today</div>
+                <div style="font-size: 0.6rem; color: var(--text-dim);">PTS TODAY</div>
             </div>
         </div>
 
         <section id="tasks-view" class="view active">
             <div class="input-group">
-                <input type="text" id="taskIn" placeholder="New objective name...">
+                <input type="text" id="taskIn" placeholder="Deploy new team directive...">
                 <button class="btn-add" onclick="addTask()">Deploy</button>
             </div>
             <div id="taskList"></div>
         </section>
 
         <section id="leader-view" class="view">
-            <h2 style="font-weight: 800; margin-bottom: 25px;">Elite Rankings</h2>
+            <h2 style="font-weight: 800; margin-bottom: 20px;">Leaderboard</h2>
             <div id="leaderContent"></div>
         </section>
 
         <section id="analytics-view" class="view">
-            <h2 style="font-weight: 800; margin-bottom: 25px;">Intelligence Map</h2>
+            <h2 style="font-weight: 800; margin-bottom: 20px;">Consistency Intelligence</h2>
             <div id="intelContent"></div>
         </section>
     </div>
@@ -167,12 +158,16 @@
         let userObj = null;
         const todayKey = new Date().toISOString().split('T')[0];
 
+        // IDENTITY CORE
         onAuthStateChanged(auth, async (u) => {
             if (!u) window.location.href = 'index.html';
             else {
                 userObj = u;
-                const snap = await getDoc(doc(db, "users", u.uid));
-                const name = snap.exists() ? snap.data().displayName : u.email.split('@')[0];
+                // Get the name from 'users' collection using 'uid'
+                const userRef = doc(db, "users", u.uid);
+                const userSnap = await getDoc(userRef);
+                const name = userSnap.exists() ? (userSnap.data().displayName || userSnap.data().callsign) : u.email.split('@')[0];
+                
                 document.getElementById('userDisplay').innerText = name;
                 document.getElementById('userAvatar').innerText = name[0].toUpperCase();
                 initTasks();
@@ -186,10 +181,10 @@
             document.getElementById(id).classList.add('active');
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
             document.getElementById('nav-' + id.split('-')[0]).classList.add('active');
-            if(id !== 'tasks-view') calculateData();
+            if(id !== 'tasks-view') calculateStats();
         };
 
-        // --- CRUD OPERATIONS ---
+        // DIRECTIVES MANAGEMENT (CRUD)
         window.addTask = async () => {
             const val = document.getElementById('taskIn').value;
             if(!val) return;
@@ -198,22 +193,28 @@
         };
 
         window.editTask = async (id, oldName) => {
-            const newName = prompt("Enter new objective name:", oldName);
-            if (newName && newName !== oldName) {
+            const newName = prompt("Edit Directive Name:", oldName);
+            if(newName && newName !== oldName) {
                 await updateDoc(doc(db, "sharedTasks", id), { name: newName });
             }
         };
 
         window.deleteTask = async (id) => {
-            if(confirm("Permanently eliminate this objective? This will not delete historical points.")) {
+            if(confirm("Permanently delete this directive?")) {
                 await deleteDoc(doc(db, "sharedTasks", id));
             }
         };
 
         window.completeTask = async (id, name) => {
             const uName = document.getElementById('userDisplay').innerText;
+            // Record completion using 'userId'
             await addDoc(collection(db, "completions"), {
-                taskId: id, taskName: name, userId: userObj.uid, userName: uName, dateKey: todayKey, timestamp: Date.now()
+                taskId: id,
+                taskName: name,
+                userId: userObj.uid, // This bridges 'uid' and 'userId'
+                userName: uName,
+                dateKey: todayKey,
+                timestamp: Date.now()
             });
             initTasks();
         };
@@ -242,66 +243,79 @@
                                 <span style="${isDone ? 'opacity:0.4; text-decoration:line-through' : 'font-weight:600'}">${data.name}</span>
                             </div>
                             <div class="task-actions">
-                                <span class="action-icon" onclick="editTask('${t.id}', '${data.name}')">✎</span>
-                                <span class="action-icon del" onclick="deleteTask('${t.id}')">✕</span>
+                                <span class="action-btn" onclick="editTask('${t.id}', '${data.name}')">✎</span>
+                                <span class="action-btn" onclick="deleteTask('${t.id}')">✕</span>
                             </div>
                         </div>`;
                 });
             });
         }
 
-        async function calculateData() {
+        async function calculateStats() {
             const tasksSnap = await getDocs(collection(db, "sharedTasks"));
             const compsSnap = await getDocs(collection(db, "completions"));
             
             const allTasks = [];
             tasksSnap.forEach(t => allTasks.push({id: t.id, name: t.data().name}));
 
-            const stats = {};
-            compsSnap.forEach(c => {
-                const d = c.data();
-                if(!stats[d.userId]) stats[d.userId] = { name: d.userName, points: 0, history: {} };
-                if(!stats[d.userId].history[d.taskId]) stats[d.userId].history[d.taskId] = new Set();
-                
-                if(!stats[d.userId].history[d.taskId].has(d.dateKey)) {
-                    stats[d.userId].history[d.taskId].add(d.dateKey);
-                    stats[d.userId].points++;
+            const usersData = {};
+
+            compsSnap.forEach(doc => {
+                const d = doc.data();
+                const uid = d.userId; // Matches your completions collection
+                if(!uid) return;
+
+                if(!usersData[uid]) {
+                    usersData[uid] = { name: d.userName, points: 0, history: {} };
+                }
+
+                if(!usersData[uid].history[d.taskId]) {
+                    usersData[uid].history[d.taskId] = new Set();
+                }
+
+                // POINT LOGIC: One point per unique task per day
+                if(!usersData[uid].history[d.taskId].has(d.dateKey)) {
+                    usersData[uid].history[d.taskId].add(d.dateKey);
+                    usersData[uid].points++;
                 }
             });
 
             // Render Leaderboard
-            const leaderArr = Object.values(stats).sort((a,b) => b.points - a.points);
-            document.getElementById('leaderContent').innerHTML = leaderArr.length ? leaderArr.map((u, i) => `
+            const sorted = Object.values(usersData).sort((a,b) => b.points - a.points);
+            document.getElementById('leaderContent').innerHTML = sorted.map((u, i) => `
                 <div class="rank-row">
-                    <div class="rank-num">#${i+1}</div>
+                    <div style="width:30px; font-weight:800; color:var(--accent)">#${i+1}</div>
                     <div style="flex:1; font-weight:700;">${u.name}</div>
-                    <div style="font-weight:900; color:var(--accent);">${u.points} PTS</div>
+                    <div style="font-weight:900; color:var(--accent)">${u.points} PTS</div>
                 </div>
-            `).join('') : '<p style="color:var(--text-dim)">No data recorded for this sprint.</p>';
+            `).join('');
 
-            // Render Intelligence
+            // Render Intel Map
             const last7 = [...Array(7)].map((_, i) => {
                 const d = new Date(); d.setDate(d.getDate() - (6-i));
                 return d.toISOString().split('T')[0];
             });
 
-            document.getElementById('intelContent').innerHTML = Object.entries(stats).length ? Object.entries(stats).map(([uid, u]) => {
-                const rows = allTasks.map(t => {
-                    const days = u.history[t.id] || new Set();
-                    const boxes = last7.map(day => `<div class="day-box ${days.has(day) ? 'active' : ''}"></div>`).join('');
-                    return `<div style="margin-bottom:12px;"><div style="font-size:0.7rem; font-weight:700; opacity:0.7; margin-bottom:4px;">${t.name}</div><div class="mini-heatmap">${boxes}</div></div>`;
+            document.getElementById('intelContent').innerHTML = Object.entries(usersData).map(([uid, u]) => {
+                const taskRows = allTasks.map(t => {
+                    const dates = u.history[t.id] || new Set();
+                    const boxes = last7.map(day => `<div class="day-box ${dates.has(day) ? 'active' : ''}"></div>`).join('');
+                    return `<div style="margin-bottom:10px;">
+                        <div style="font-size:0.7rem; opacity:0.6; margin-bottom:4px;">${t.name}</div>
+                        <div class="mini-heatmap">${boxes}</div>
+                    </div>`;
                 }).join('');
 
                 return `
                     <div class="card">
-                        <div class="collapse-header" onclick="toggleCollapse('c-${uid}')">
-                            <div style="font-weight:800; font-size:1.1rem; color:var(--accent)">${u.name}</div>
-                            <div style="font-weight:800;">+</div>
+                        <div class="collapse-header" onclick="toggleCollapse('intel-${uid}')">
+                            <div style="font-weight:800; color:var(--accent)">${u.name}</div>
+                            <div>[ + ]</div>
                         </div>
-                        <div class="collapse-content" id="c-${uid}">${rows}</div>
+                        <div class="collapse-content" id="intel-${uid}">${taskRows}</div>
                     </div>
                 `;
-            }).join('') : '<p style="color:var(--text-dim)">Intelligence map awaiting data...</p>';
+            }).join('');
         }
     </script>
 </body>
