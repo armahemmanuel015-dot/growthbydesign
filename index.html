@@ -3,129 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Growth By Design</title>
+    <title>GBD | The Entry</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
+<body class="auth-page">
 
-    <div id="authSection" class="auth-page">
-        <div class="auth-wrapper" id="authWrapper">
-            <div class="background-shape"></div>
-            <div class="secondary-shape"></div>
-            
-            <div class="credentials-panel signin">
-                <h2 class="slide-element">Log In</h2>
-                <div class="field-wrapper slide-element">
-                    <input type="email" id="loginEmail" required><label>Email</label>
-                </div>
-                <div class="field-wrapper slide-element">
-                    <input type="password" id="loginPass" required><label>Password</label>
-                </div>
-                <br>
-                <button class="submit-button slide-element" id="loginBtn">Enter Design</button>
-                <p class="switch-link slide-element">New Brother? <a href="#" onclick="toggleAuth()">Join Now</a></p>
+    <div class="auth-wrapper" id="authWrapper">
+        <div class="background-shape"></div>
+        
+        <div class="credentials-panel signin">
+            <h2 class="slide-element">Log In</h2>
+            <div class="field-wrapper slide-element">
+                <input type="email" id="loginEmail" required placeholder=" ">
+                <label>Email</label>
             </div>
-
-            <div class="credentials-panel signup">
-                <h2>Covenant</h2>
-                <div class="field-wrapper"><input type="text" id="regName" required><label>Full Name</label></div>
-                <div class="field-wrapper"><input type="email" id="regEmail" required><label>Email</label></div>
-                <div class="field-wrapper"><input type="password" id="regPass" required><label>Password</label></div>
-                <button class="submit-button" id="signUpBtn">Join</button>
-                <p class="switch-link">Back to <a href="#" onclick="toggleAuth()">Login</a></p>
+            <div class="field-wrapper slide-element">
+                <input type="password" id="loginPass" required placeholder=" ">
+                <label>Password</label>
             </div>
+            <button class="submit-button slide-element" id="loginBtn">Enter Design</button>
+            <p class="switch-link slide-element">New Brother? <a href="#" onclick="toggleAuth()">Join the Covenant</a></p>
         </div>
-    </div>
 
-    <div id="appSection" style="display: none;">
-        <nav class="nav-container">
-            <h2 style="color: var(--accent); text-align: center;">GBD.</h2>
-            <ul class="nav-links">
-                <li class="active" onclick="showView('dashView')"><i data-lucide="layout"></i><span>Dashboard</span></li>
-                <li onclick="showView('tasksView')"><i data-lucide="check-square"></i><span>Architect Tasks</span></li>
-                <li onclick="showView('statsView')"><i data-lucide="bar-chart"></i><span>Analytics</span></li>
-                <li onclick="handleLogout()" style="margin-top: 50px; color: var(--danger);"><i data-lucide="log-out"></i><span>Sign Out</span></li>
-            </ul>
-        </nav>
-
-        <main id="dashView" class="view-section active">
-            <h1>Daily Briefing</h1>
-            <div class="dash-grid">
-                <div class="card">
-                    <h3>My Progress Today</h3>
-                    <div class="progress-container"><div id="myProgressFill" class="progress-fill"></div></div>
-                    <p id="progressText" style="text-align: right;">0% Complete</p>
-                </div>
-                <div class="card">
-                    <h3>Brotherhood Status</h3>
-                    <div id="miniLeaderboard"></div>
-                </div>
+        <div class="credentials-panel signup">
+            <h2>The Covenant</h2>
+            <div class="field-wrapper">
+                <input type="text" id="regName" required placeholder=" ">
+                <label>Full Name</label>
             </div>
-        </main>
-
-        <main id="tasksView" class="view-section">
-    <h1>Architect Your Day</h1>
-    
-    <div class="card" style="margin-bottom: 20px;">
-        <div style="display: flex; flex-direction: column; gap: 15px;">
-            <input type="text" id="taskInput" placeholder="What is the next discipline?" 
-                   style="width: 100%; font-size: 18px; background: transparent; border: none; border-bottom: 2px solid #2e3a59; padding: 10px 0;">
-            
-           <div class="selector-group">
-    <i data-lucide="refresh-cw" size="16"></i>
-    <select id="frequencyInput">
-        <option value="once">One-time</option>
-        <option value="daily">Daily</option>
-        <option value="weekly">Weekly</option>
-    </select>
-    
-    <div style="width: 1px; background: #2e3a59; margin: 0 10px;"></div>
-
-    <i data-lucide="layers" size="16"></i>
-    <select id="pillarInput">
-        <option value="Spiritual">Spiritual</option>
-        <option value="Intellectual">Intellectual</option>
-        <option value="Character">Character</option>
-    </select>
-    
-    <div style="width: 1px; background: #2e3a59; margin: 0 10px;"></div>
-    
-    <i data-lucide="flag" size="16"></i>
-    <select id="priorityInput">
-        <option value="urgent">Urgent</option>
-        <option value="high">High</option>
-        <option value="normal">Normal</option>
-    </select>
-</div>
-                
-                <button class="submit-button" onclick="addTask()" style="height: 45px; width: 140px;">Create Task</button>
+            <div class="field-wrapper">
+                <input type="email" id="regEmail" required placeholder=" ">
+                <label>Email</label>
             </div>
+            <div class="field-wrapper">
+                <input type="password" id="regPass" required placeholder=" ">
+                <label>Password</label>
+            </div>
+            <button class="submit-button" id="signUpBtn">Sign & Join</button>
+            <p class="switch-link">Already a member? <a href="#" onclick="toggleAuth()">Login</a></p>
         </div>
-    </div>
-
-    <div style="display: grid; grid-template-columns: 2fr 1fr 1fr auto; padding: 0 15px 10px; color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase;">
-        <span>Task Name</span>
-        <span>Category</span>
-        <span>Priority</span>
-        <span>Actions</span>
-    </div>
-    <div id="masterTaskList"></div>
-            
-</main>
-
-        <main id="statsView" class="view-section">
-            <h1>Analytics HQ</h1>
-            <div class="card">
-                <canvas id="mainVelocityChart"></canvas>
-            </div>
-        </main>
     </div>
 
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
     <script src="script.js"></script>
 </body>
 </html>
