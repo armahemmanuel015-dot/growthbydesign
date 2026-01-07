@@ -4,70 +4,182 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Growth By Design | HQ</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/font/lucide.min.css" rel="stylesheet">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            --bg: #0f172a; --sidebar: #1e293b; --card: #1e293b;
+            --text-main: #f8fafc; --text-muted: #94a3b8;
+            --accent: #8b5cf6; --gold: #f59e0b;
+            --danger: #ef4444; --success: #10b981; --border: #334155;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text-main); height: 100vh; overflow: hidden; }
+        .app-container { display: flex; height: 100%; }
+        .sidebar { width: 260px; background: var(--sidebar); padding: 30px; display: flex; flex-direction: column; border-right: 1px solid var(--border); }
+        .logo { font-size: 24px; font-weight: 800; margin-bottom: 50px; letter-spacing: -1px; }
+        .logo span { color: var(--accent); }
+        .nav-links { list-style: none; flex: 1; }
+        .nav-links li { padding: 12px 16px; margin-bottom: 8px; border-radius: 8px; color: var(--text-muted); display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .nav-links li.active { background: rgba(139, 92, 246, 0.1); color: var(--accent); font-weight: 600; }
+        .main-content { flex: 1; padding: 40px; overflow-y: auto; }
+        header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; }
+        .command-card { background: linear-gradient(135deg, #3a2510, #1e293b); border: 1px solid var(--gold); padding: 15px 25px; border-radius: 12px; max-width: 450px; }
+        .command-label { color: var(--gold); font-size: 10px; font-weight: 800; letter-spacing: 1px; margin-bottom: 5px; }
+        .stats-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .split-view { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
+        .card { background: var(--card); border-radius: 16px; padding: 25px; border: 1px solid var(--border); }
+        .card h3 { font-size: 12px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; font-size: 11px; color: var(--text-muted); padding-bottom: 15px; border-bottom: 1px solid var(--border); }
+        td { padding: 15px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+        .task-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; background: #0f172a; margin-bottom: 8px; border-radius: 8px; border: 1px solid var(--border); cursor: pointer; }
+        .task-item.completed { opacity: 0.4; border-color: var(--success); }
+        .status-pill { padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: 800; }
+        .status-pill.active { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .status-pill.shame { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid var(--danger); }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 1000; backdrop-filter: blur(8px); }
+        .modal.hidden { display: none; }
+        .modal-content { background: var(--card); padding: 40px; border-radius: 24px; text-align: center; border: 2px solid var(--danger); max-width: 450px; }
+        button { background: var(--text-main); color: #000; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; cursor: pointer; margin-top: 20px; }
+    </style>
 </head>
 <body>
-    <div class="workspace">
+
+    <div id="shameModal" class="modal hidden">
+        <div class="modal-content">
+            <div style="font-size: 50px;">⚠️</div>
+            <h2>PROTOCOL BREACH</h2>
+            <div id="shameMsg" style="font-size: 20px; color: var(--danger); font-weight: 800; margin: 20px 0;"></div>
+            <button onclick="document.getElementById('shameModal').classList.add('hidden')">I Acknowledge</button>
+        </div>
+    </div>
+
+    <div class="app-container">
         <nav class="sidebar">
-            <div class="logo">Growth by Design<span>.</span></div>
+            <div class="logo">GBD<span>.</span></div>
             <ul class="nav-links">
-                <li class="active"><i class="lucide-layout-dashboard"></i> Dashboard</li>
-                <li><i class="lucide-bar-chart-3"></i> Analytics</li>
-                <li><i class="lucide-message-square"></i> Locker Room</li>
-                <li><i class="lucide-shield-check"></i> The Covenant</li>
+                <li class="active"><i data-lucide="layout-dashboard"></i> Dashboard</li>
+                <li><i data-lucide="bar-chart-2"></i> Analytics</li>
+                <li><i data-lucide="message-square"></i> Locker Room</li>
             </ul>
-            <div class="user-profile">
-                <div class="avatar">O</div>
-                <span>Omar (Admin)</span>
-            </div>
         </nav>
 
-        <main class="content">
-            <header class="top-bar">
-                <div class="greeting">
-                    <h1>Daily Performance</h1>
-                    <p>Wednesday, January 7, 2026</p>
+        <main class="main-content">
+            <header>
+                <div>
+                    <h1>Growth HQ</h1>
+                    <p style="color: var(--text-muted)">Discipline is a choice.</p>
                 </div>
-                <div class="admin-announcement">
-                    <span class="badge">COMMAND</span>
-                    <p id="command-text">"Are you the one to come, or should we wait for another?"</p>
+                <div class="command-card">
+                    <div class="command-label">👑 CAPTAIN'S LOG</div>
+                    <p>"Finish the day strong. No excuses."</p>
                 </div>
             </header>
 
             <section class="stats-grid">
-                <div class="stat-card">
-                    <span class="label">Group Velocity</span>
-                    <div class="value">84%</div>
-                    <div class="trend up">+4.2%</div>
-                </div>
-                <div class="stat-card">
-                    <span class="label">Active Streaks</span>
-                    <div class="value">3/4</div>
-                    <div class="trend">Steady</div>
+                <div class="card"><h3>Velocity</h3><canvas id="velocityChart" height="100"></canvas></div>
+                <div class="card" style="text-align: center;">
+                    <h3>Progress</h3>
+                    <div id="myProgressText" style="font-size: 48px; font-weight: 800; margin: 10px 0;">0%</div>
                 </div>
             </section>
 
-            <section class="main-board">
-                <div class="board-header">
+            <section class="split-view">
+                <div class="card">
                     <h3>Brotherboard</h3>
-                    <button class="btn-primary">+ Add Task</button>
+                    <table>
+                        <thead><tr><th>Brother</th><th>Velocity</th><th>Status</th></tr></thead>
+                        <tbody id="leaderboardBody"></tbody>
+                    </table>
                 </div>
-                <table class="design-table">
-                    <thead>
-                        <tr>
-                            <th>Brother</th>
-                            <th>Spiritual</th>
-                            <th>Intellectual</th>
-                            <th>Character</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="leaderboard-body">
-                        </tbody>
-                </table>
+                <div class="card">
+                    <h3>My Daily Design</h3>
+                    <div id="taskList"></div>
+                </div>
             </section>
         </main>
     </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, updateDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCu03ePMFx9mDgbCdT9LWcoPOg2SGQIBEU",
+            authDomain: "growthbydesign-2a6d0.firebaseapp.com",
+            projectId: "growthbydesign-2a6d0",
+            storageBucket: "growthbydesign-2a6d0.firebasestorage.app",
+            messagingSenderId: "807311473882",
+            appId: "1:807311473882:web:49300d2d84355eb4cbb9e3"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const USER_ID = "omar_001"; // Change for each brother
+
+        // Initialize App
+        lucide.createIcons();
+
+        // Listen for Users
+        onSnapshot(collection(db, "users"), (snap) => {
+            const users = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            renderLeaderboard(users);
+            const slacker = users.find(u => u.status === 'shame');
+            if (slacker) {
+                document.getElementById('shameMsg').innerText = `"${slacker.name}, are you the one to come...?"`;
+                document.getElementById('shameModal').classList.remove('hidden');
+            }
+        });
+
+        // Listen for Tasks
+        const q = query(collection(db, "tasks"), where("userId", "==", USER_ID));
+        onSnapshot(q, (snap) => {
+            const tasks = snap.docs.map(d => ({id: d.id, ...d.data()}));
+            renderTasks(tasks);
+            updateMyProgress(tasks);
+        });
+
+        function renderLeaderboard(users) {
+            const body = document.getElementById('leaderboardBody');
+            body.innerHTML = users.map(u => `
+                <tr>
+                    <td style="font-weight:600">${u.name}</td>
+                    <td><div style="width:80px; background:#334155; height:4px; border-radius:2px;"><div style="width:${u.progress}%; background:var(--accent); height:100%;"></div></div></td>
+                    <td><span class="status-pill ${u.status === 'shame' ? 'shame' : 'active'}">${u.status === 'shame' ? 'FAILING' : 'ACTIVE'}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderTasks(tasks) {
+            const list = document.getElementById('taskList');
+            list.innerHTML = tasks.map(t => `
+                <div class="task-item ${t.done ? 'completed' : ''}" id="${t.id}">
+                    <div><div style="font-size:14px; font-weight:600">${t.title}</div><span style="font-size:10px; color:var(--text-muted)">${t.pillar}</span></div>
+                    <i data-lucide="${t.done ? 'check-circle' : 'circle'}" style="color:${t.done ? 'var(--success)' : 'var(--text-muted)'}"></i>
+                </div>
+            `).join('');
+            lucide.createIcons();
+            
+            tasks.forEach(t => {
+                document.getElementById(t.id).onclick = () => updateDoc(doc(db, "tasks", t.id), { done: !t.done });
+            });
+        }
+
+        async function updateMyProgress(tasks) {
+            const percent = tasks.length ? Math.round((tasks.filter(t => t.done).length / tasks.length) * 100) : 0;
+            document.getElementById('myProgressText').innerText = percent + "%";
+            await updateDoc(doc(db, "users", USER_ID), { progress: percent, status: percent === 0 ? 'shame' : 'active' });
+        }
+
+        // Chart Init
+        new Chart(document.getElementById('velocityChart'), {
+            type: 'line', data: { labels: ['M','T','W','T','F','S','S'], datasets: [{ data: [65, 82, 70, 95, 85, 90, 92], borderColor: '#8b5cf6', tension: 0.4 }] },
+            options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false } } } }
+        });
+    </script>
 </body>
 </html>
