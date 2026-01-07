@@ -214,7 +214,7 @@
         const todayKey = new Date().toISOString().split('T')[0];
 
         onAuthStateChanged(auth, async (user) => {
-            if (!user) window.location.href = 'index.html';
+            if (!user) window.location.href = '/index.html';
             else { 
                 currentUser = user; 
                 await setDoc(doc(db, "users", user.uid), { uid: user.uid, email: user.email }, { merge: true });
