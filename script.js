@@ -60,20 +60,27 @@ window.handleLogout = function() {
 };
 
 // Auth State Observer (Switches screens)
-auth.onAuthStateChanged(user => {
-    const authSec = document.getElementById('authSection');
-    const appSec = document.getElementById('appSection');
-
+// Auth Guard & Redirection
+firebase.auth().onAuthStateChanged(user => {
+    const currentPage = window.location.pathname.split("/").pop();
+    
     if (user) {
-        authSec.style.display = 'none';
-        appSec.style.display = 'flex';
-        initUserApp(user.uid);
+        // If logged in and on login page, go to dashboard
+        if (currentPage === "index.html" || currentPage === "") {
+            window.location.href = "dashboard.html";
+        }
     } else {
-        authSec.style.display = 'flex';
-        appSec.style.display = 'none';
+        // If NOT logged in and NOT on login page, go back to login
+        if (currentPage !== "index.html" && currentPage !== "") {
+            window.location.href = "index.html";
+        }
     }
 });
 
+// Auth Toggle (Sliding animation)
+window.toggleAuth = function() {
+    document.getElementById('authWrapper').classList.toggle('signup-active');
+};
 // --- 4. APP LOGIC ---
 
 function initUserApp(uid) {
