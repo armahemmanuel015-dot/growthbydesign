@@ -26,7 +26,6 @@
             min-height: 100vh;
         }
         
-        /* FIXED MOBILE-FRIENDLY NAV */
         nav { 
             display: flex; justify-content: space-between; align-items: center; 
             padding: 0 20px; 
@@ -48,7 +47,7 @@
 
         .container { 
             max-width: 800px; margin: 0 auto; 
-            padding: 100px 20px 40px 20px; /* Offset for fixed nav */
+            padding: 100px 20px 40px 20px; 
         }
 
         .view { display: none; animation: slideUp 0.4s ease-out; }
@@ -158,14 +157,20 @@
         const auth = getAuth(app);
 
         // DATE HELPER (GMT+0 Friendly)
-        const getLocalDate = (d = new Date()) => d.toISOString().split('T')[0];
-        const todayKey = getLocalDate();
+        const getLocalDateString = (d) => {
+            const date = d ? new Date(d) : new Date();
+            return date.getUTCFullYear() + '-' + 
+                   String(date.getUTCMonth() + 1).padStart(2, '0') + '-' + 
+                   String(date.getUTCDate()).padStart(2, '0');
+        };
 
+        const todayKey = getLocalDateString();
         let userObj = null;
 
         onAuthStateChanged(auth, async (u) => {
-            if (!u) window.location.href = 'index.html';
-            else {
+            if (!u) {
+                window.location.href = 'index.html';
+            } else {
                 userObj = u;
                 const userRef = doc(db, "users", u.uid);
                 const userSnap = await getDoc(userRef);
@@ -201,7 +206,7 @@
                 userId: userObj.uid, 
                 userName: uName,
                 dateKey: todayKey,
-                timestamp: Date.now()
+                timestamp: Date.now() // This creates the 1767831147769 number
             });
             initTasks();
         };
@@ -210,7 +215,10 @@
 
         function initTasks() {
             onSnapshot(query(collection(db, "sharedTasks"), orderBy("createdAt", "asc")), async (snap) => {
-                const doneSnap = await getDocs(query(collection(db, "completions"), where("userId", "==", userObj.uid), where("dateKey", "==", todayKey)));
+                const doneSnap = await getDocs(query(collection(db, "completions"), 
+                    where("userId", "==", userObj.uid), 
+                    where("dateKey", "==", todayKey)));
+                
                 const doneIds = new Set();
                 doneSnap.forEach(d => doneIds.add(d.data().taskId));
                 document.getElementById('myPoints').innerText = doneIds.size;
@@ -236,20 +244,43 @@
         async function calculateStats() {
             const tasksSnap = await getDocs(collection(db, "sharedTasks"));
             const compsSnap = await getDocs(collection(db, "completions"));
+            
             const allTasks = [];
             tasksSnap.forEach(t => allTasks.push({id: t.id, name: t.data().name}));
 
             const usersData = {};
+            
+            // Generate the last 7 days keys
+            const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+            const last7Info = [];
+            for(let i=6; i>=0; i--) {
+                const d = new Date();
+                d.setUTCDate(d.getUTCDate() - i);
+                last7Info.push({
+                    key: getLocalDateString(d),
+                    label: dayLabels[d.getUTCDay()]
+                });
+            }
+
             compsSnap.forEach(doc => {
                 const d = doc.data();
                 const uid = d.userId;
                 if(!uid) return;
+
                 if(!usersData[uid]) usersData[uid] = { name: d.userName, points: 0, history: {} };
+                
+                // CRITICAL FIX: Ensure we use the dateKey from DB
+                const dateFromDB = d.dateKey; 
                 if(!usersData[uid].history[d.taskId]) usersData[uid].history[d.taskId] = new Set();
-                if(!usersData[uid].history[d.taskId].has(d.dateKey)) {
-                    usersData[uid].history[d.taskId].add(d.dateKey);
-                    usersData[uid].points++;
-                }
+                
+                usersData[uid].history[d.taskId].add(dateFromDB);
+            });
+
+            // Calculate total points based on unique tasks per day
+            Object.values(usersData).forEach(u => {
+                let total = 0;
+                Object.values(u.history).forEach(dateSet => total += dateSet.size);
+                u.points = total;
             });
 
             // LEADERBOARD
@@ -262,14 +293,7 @@
                 </div>
             `).join('');
 
-            // INTELLIGENCE MAP
-            const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-            const last7Info = [...Array(7)].map((_, i) => {
-                const d = new Date();
-                d.setDate(d.getDate() - (6 - i));
-                return { key: getLocalDate(d), label: dayLabels[d.getDay()] };
-            });
-
+            // INTEL MAP
             const headerHtml = `
                 <div class="mini-heatmap" style="margin-bottom:10px; opacity: 0.8;">
                     ${last7Info.map(day => `<div style="flex:1; text-align:center; font-size:0.6rem; color:var(--accent); font-weight:800;">${day.label}</div>`).join('')}
@@ -277,8 +301,12 @@
 
             document.getElementById('intelContent').innerHTML = Object.entries(usersData).map(([uid, u]) => {
                 const taskRows = allTasks.map(t => {
-                    const dates = u.history[t.id] || new Set();
-                    const boxes = last7Info.map(day => `<div class="day-box ${dates.has(day.key) ? 'active' : ''}"></div>`).join('');
+                    const userTaskHistory = u.history[t.id] || new Set();
+                    const boxes = last7Info.map(day => {
+                        const active = userTaskHistory.has(day.key);
+                        return `<div class="day-box ${active ? 'active' : ''}"></div>`;
+                    }).join('');
+                    
                     return `<div style="margin-bottom:12px;">
                         <div style="font-size:0.7rem; opacity:0.6; margin-bottom:4px;">${t.name}</div>
                         <div class="mini-heatmap">${boxes}</div>
