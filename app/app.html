@@ -291,15 +291,25 @@
             `).join('');
 
             // Render Intel Map
-            const last7 = [...Array(7)].map((_, i) => {
-                const d = new Date(); d.setDate(d.getDate() - (6-i));
-                return d.toISOString().split('T')[0];
+           // Render Intel Map
+            const dayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const last7Info = [...Array(7)].map((_, i) => {
+                const d = new Date();
+                d.setDate(d.getDate() - (6 - i));
+                return {
+                    key: d.toISOString().split('T')[0],
+                    label: dayLabels[d.getDay()].charAt(0) // Takes 'M', 'T', 'W', etc.
+                };
             });
+
+            const headerHtml = `<div class="mini-heatmap" style="margin-bottom:10px; margin-left:0;">
+                ${last7Info.map(day => `<div style="flex:1; text-align:center; font-size:0.6rem; color:var(--accent); font-weight:800;">${day.label}</div>`).join('')}
+            </div>`;
 
             document.getElementById('intelContent').innerHTML = Object.entries(usersData).map(([uid, u]) => {
                 const taskRows = allTasks.map(t => {
                     const dates = u.history[t.id] || new Set();
-                    const boxes = last7.map(day => `<div class="day-box ${dates.has(day) ? 'active' : ''}"></div>`).join('');
+                    const boxes = last7Info.map(day => `<div class="day-box ${dates.has(day.key) ? 'active' : ''}"></div>`).join('');
                     return `<div style="margin-bottom:10px;">
                         <div style="font-size:0.7rem; opacity:0.6; margin-bottom:4px;">${t.name}</div>
                         <div class="mini-heatmap">${boxes}</div>
@@ -312,7 +322,10 @@
                             <div style="font-weight:800; color:var(--accent)">${u.name}</div>
                             <div>[ + ]</div>
                         </div>
-                        <div class="collapse-content" id="intel-${uid}">${taskRows}</div>
+                        <div class="collapse-content" id="intel-${uid}">
+                            ${headerHtml}
+                            ${taskRows}
+                        </div>
                     </div>
                 `;
             }).join('');
