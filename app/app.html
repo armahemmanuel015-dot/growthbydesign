@@ -23,16 +23,16 @@
             margin: 0; background: var(--bg); color: var(--text-main); 
             font-family: 'Plus Jakarta Sans', sans-serif; 
             background-image: radial-gradient(circle at 50% -20%, #11141d 0%, #05070a 100%);
-            min-height: 100vh; overflow-x: hidden;
+            min-height: 100vh;
         }
         
-        /* MOBILE FRIENDLY FIXED NAV */
+        /* FIXED MOBILE NAV */
         nav { 
             display: flex; justify-content: space-between; align-items: center; 
             padding: 0 20px; 
             position: fixed; top: 0; left: 0; right: 0; 
-            backdrop-filter: blur(25px); 
-            background: rgba(5, 7, 10, 0.8); 
+            backdrop-filter: blur(20px); 
+            background: rgba(5, 7, 10, 0.85); 
             border-bottom: 1px solid var(--glass-border); 
             z-index: 1000; height: 70px;
         }
@@ -53,17 +53,11 @@
 
         .view { display: none; animation: slideUp 0.4s ease-out; }
         .view.active { display: block; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .profile-header {
             display: flex; align-items: center; justify-content: space-between;
             background: var(--surface); padding: 20px; border-radius: 24px;
             border: 1px solid var(--glass-border); margin-bottom: 30px;
-        }
-        .profile-info { display: flex; align-items: center; gap: 15px; }
-        .avatar { 
-            width: 45px; height: 45px; border-radius: 12px; background: var(--accent); 
-            color: #000; display: flex; align-items: center; justify-content: center; font-weight: 800;
         }
 
         .task-item {
@@ -71,34 +65,33 @@
             display: flex; justify-content: space-between; align-items: center;
             margin-bottom: 12px; border: 1px solid var(--glass-border);
         }
-        .task-content { display: flex; align-items: center; gap: 15px; flex: 1; }
+
         .check-btn {
             width: 32px; height: 32px; border-radius: 10px; border: 2px solid var(--glass-border);
-            cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;
+            cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.3s;
         }
         .check-btn.done { background: var(--success); border-color: var(--success); color: white; }
 
         .card { background: var(--surface); border: 1px solid var(--glass-border); border-radius: 24px; padding: 20px; margin-bottom: 20px; }
         .collapse-header { cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .collapse-content { max-height: 0; opacity: 0; overflow: hidden; transition: 0.4s ease; }
-        .collapse-content.open { max-height: 2000px; opacity: 1; margin-top: 20px; border-top: 1px solid var(--glass-border); padding-top: 20px; }
+        .collapse-content { max-height: 0; opacity: 0; overflow: hidden; transition: 0.4s; }
+        .collapse-content.open { max-height: 2000px; opacity: 1; margin-top: 15px; border-top: 1px solid var(--glass-border); padding-top: 15px;}
 
         .mini-heatmap { display: flex; gap: 4px; margin-top: 8px; }
-        .day-box { flex: 1; height: 10px; border-radius: 3px; background: rgba(255,255,255,0.05); transition: 0.3s; }
-        .day-box.active { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+        .day-box { flex: 1; height: 10px; border-radius: 3px; background: rgba(255,255,255,0.05); }
+        .day-box.active { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
 
-        .rank-row { display: flex; align-items: center; padding: 15px; background: rgba(255,255,255,0.03); border-radius: 18px; margin-bottom: 10px; }
-        .input-group { display: flex; gap: 10px; margin-bottom: 30px; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 18px; border: 1px solid var(--glass-border); }
-        input { background: none; border: none; color: white; flex: 1; padding: 10px; outline: none; font-size: 0.9rem; }
-        .btn-add { background: var(--accent); color: black; border: none; padding: 10px 24px; border-radius: 12px; font-weight: 800; cursor: pointer; }
+        .input-group { display: flex; gap: 10px; margin-bottom: 30px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 15px; border: 1px solid var(--glass-border); }
+        input { background: none; border: none; color: white; flex: 1; padding: 10px; outline: none; font-family: inherit; }
+        .btn-add { background: var(--accent); color: black; border: none; padding: 10px 20px; border-radius: 10px; font-weight: 800; cursor: pointer; }
     </style>
 </head>
 <body>
 
     <nav>
-        <div style="font-weight: 800; color: var(--accent); font-size: 0.8rem; letter-spacing: 1px;">GBD ELITE</div>
+        <div style="font-weight: 800; color: var(--accent); font-size: 0.8rem;">GBD ELITE</div>
         <div class="nav-links">
-            <button onclick="showView('tasks-view')" id="nav-tasks" class="active">DIRECTIVES</button>
+            <button onclick="showView('tasks-view')" id="nav-tasks" class="active">TASKS</button>
             <button onclick="showView('leader-view')" id="nav-leader">RANKS</button>
             <button onclick="showView('analytics-view')" id="nav-analytics">INTEL</button>
         </div>
@@ -107,29 +100,29 @@
 
     <div class="container">
         <div class="profile-header">
-            <div class="profile-info">
-                <div class="avatar" id="userAvatar">?</div>
+            <div class="profile-info" style="display:flex; align-items:center; gap:15px;">
+                <div id="userAvatar" style="width:45px; height:45px; border-radius:12px; background:var(--accent); color:#000; display:flex; align-items:center; justify-content:center; font-weight:800;">?</div>
                 <div>
-                    <div id="userDisplay" style="font-weight: 800; font-size: 1.1rem;">Agent...</div>
-                    <div style="font-size: 0.6rem; color: var(--text-dim); letter-spacing: 1px;">STATUS: ONLINE</div>
+                    <div id="userDisplay" style="font-weight: 800; font-size: 1.1rem;">Agent</div>
+                    <div style="font-size: 0.6rem; color: var(--text-dim);">SYSTEM SYNCED (UTC)</div>
                 </div>
             </div>
             <div style="text-align: right;">
                 <div id="myPoints" style="font-size: 1.5rem; font-weight: 900; color: var(--accent);">0</div>
-                <div style="font-size: 0.6rem; color: var(--text-dim);">GLOBAL PTS</div>
+                <div style="font-size: 0.6rem; color: var(--text-dim);">PTS TODAY</div>
             </div>
         </div>
 
         <section id="tasks-view" class="view active">
             <div class="input-group">
-                <input type="text" id="taskIn" placeholder="Enter new squadron objective...">
+                <input type="text" id="taskIn" placeholder="New objective...">
                 <button class="btn-add" onclick="addTask()">Deploy</button>
             </div>
             <div id="taskList"></div>
         </section>
 
         <section id="leader-view" class="view">
-            <h2 style="font-weight: 800; margin-bottom: 20px;">Global Ranks</h2>
+            <h2 style="font-weight: 800; margin-bottom: 20px;">Leaderboard</h2>
             <div id="leaderContent"></div>
         </section>
 
@@ -157,8 +150,9 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // SYNCED GLOBAL DATE LOGIC (UTC)
-        const getGlobalDate = (d = new Date()) => {
+        // STRICT UTC HELPER
+        const getUTCDateString = (dateInput = new Date()) => {
+            const d = new Date(dateInput);
             return d.getUTCFullYear() + '-' + 
                    String(d.getUTCMonth() + 1).padStart(2, '0') + '-' + 
                    String(d.getUTCDate()).padStart(2, '0');
@@ -192,28 +186,23 @@
         window.addTask = async () => {
             const val = document.getElementById('taskIn').value;
             if(!val) return;
-            // Record using the creation timestamp
-            await addDoc(collection(db, "sharedTasks"), { 
-                name: val, 
-                createdAt: Date.now(),
-                creator: userObj.uid
-            });
+            await addDoc(collection(db, "sharedTasks"), { name: val, createdAt: Date.now() });
             document.getElementById('taskIn').value = "";
         };
 
         window.completeTask = async (id, name) => {
             const uName = document.getElementById('userDisplay').innerText;
-            const globalToday = getGlobalDate();
+            const utcToday = getUTCDateString(); // Forced UTC
             
             await addDoc(collection(db, "completions"), {
                 taskId: id,
                 taskName: name,
                 userId: userObj.uid, 
                 userName: uName,
-                dateKey: globalToday, // Stored as "2026-01-08" regardless of local timezone
+                dateKey: utcToday,
                 timestamp: Date.now()
             });
-            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: ['#00f2ff', '#ffffff'] });
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#00f2ff', '#ffffff'] });
             initTasks();
         };
 
@@ -221,11 +210,8 @@
 
         function initTasks() {
             onSnapshot(query(collection(db, "sharedTasks"), orderBy("createdAt", "asc")), async (snap) => {
-                const globalToday = getGlobalDate();
-                const doneSnap = await getDocs(query(collection(db, "completions"), 
-                    where("userId", "==", userObj.uid), 
-                    where("dateKey", "==", globalToday)));
-                
+                const utcToday = getUTCDateString();
+                const doneSnap = await getDocs(query(collection(db, "completions"), where("userId", "==", userObj.uid), where("dateKey", "==", utcToday)));
                 const doneIds = new Set();
                 doneSnap.forEach(d => doneIds.add(d.data().taskId));
                 document.getElementById('myPoints').innerText = doneIds.size;
@@ -237,7 +223,7 @@
                     const isDone = doneIds.has(t.id);
                     list.innerHTML += `
                         <div class="task-item">
-                            <div class="task-content">
+                            <div style="display:flex; align-items:center; gap:15px; flex:1;">
                                 <div class="check-btn ${isDone ? 'done' : ''}" onclick="${isDone ? '' : `completeTask('${t.id}', '${data.name}')`}">
                                     ${isDone ? '✓' : ''}
                                 </div>
@@ -256,39 +242,29 @@
             tasksSnap.forEach(t => allTasks.push({id: t.id, name: t.data().name}));
 
             const usersData = {};
-            
-            // Build the Global Intel Timeline (Last 7 Days in UTC)
             const dayLabels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-            const intelTimeline = [];
+            const last7 = [];
             for(let i=6; i>=0; i--) {
                 const d = new Date();
                 d.setUTCDate(d.getUTCDate() - i);
-                intelTimeline.push({
-                    key: getGlobalDate(d),
-                    label: dayLabels[d.getUTCDay()]
-                });
+                last7.push({ key: getUTCDateString(d), label: dayLabels[d.getUTCDay()] });
             }
 
             compsSnap.forEach(doc => {
                 const d = doc.data();
-                const uid = d.userId;
-                if(!uid) return;
-
-                if(!usersData[uid]) usersData[uid] = { name: d.userName, points: 0, history: {} };
+                if(!usersData[d.userId]) usersData[d.userId] = { name: d.userName, points: 0, history: {} };
+                if(!usersData[d.userId].history[d.taskId]) usersData[d.userId].history[d.taskId] = new Set();
                 
-                const dbDate = d.dateKey; 
-                if(!usersData[uid].history[d.taskId]) usersData[uid].history[d.taskId] = new Set();
-                
-                if(!usersData[uid].history[d.taskId].has(dbDate)) {
-                    usersData[uid].history[d.taskId].add(dbDate);
-                    usersData[uid].points++; // 1 Point per Task per Day
+                if(!usersData[d.userId].history[d.taskId].has(d.dateKey)) {
+                    usersData[d.userId].history[d.taskId].add(d.dateKey);
+                    usersData[d.userId].points++;
                 }
             });
 
             // LEADERBOARD
             const sorted = Object.values(usersData).sort((a,b) => b.points - a.points);
             document.getElementById('leaderContent').innerHTML = sorted.map((u, i) => `
-                <div class="rank-row">
+                <div class="rank-row" style="display:flex; align-items:center; padding:15px; background:rgba(255,255,255,0.03); border-radius:18px; margin-bottom:10px;">
                     <div style="width:30px; font-weight:800; color:var(--accent)">#${i+1}</div>
                     <div style="flex:1; font-weight:700;">${u.name}</div>
                     <div style="font-weight:900; color:var(--accent)">${u.points} PTS</div>
@@ -296,33 +272,27 @@
             `).join('');
 
             // INTEL MAP
-            const headerHtml = `
-                <div class="mini-heatmap" style="margin-bottom:12px;">
-                    ${intelTimeline.map(day => `<div style="flex:1; text-align:center; font-size:0.6rem; color:var(--accent); font-weight:800; opacity:0.6;">${day.label}</div>`).join('')}
-                </div>`;
+            const headerHtml = `<div class="mini-heatmap" style="margin-bottom:10px;">
+                ${last7.map(day => `<div style="flex:1; text-align:center; font-size:0.6rem; color:var(--accent); font-weight:800; opacity:0.6;">${day.label}</div>`).join('')}
+            </div>`;
 
             document.getElementById('intelContent').innerHTML = Object.entries(usersData).map(([uid, u]) => {
                 const taskRows = allTasks.map(t => {
                     const dates = u.history[t.id] || new Set();
-                    const boxes = intelTimeline.map(day => `<div class="day-box ${dates.has(day.key) ? 'active' : ''}"></div>`).join('');
-                    
-                    return `<div style="margin-bottom:14px;">
-                        <div style="font-size:0.7rem; color:var(--text-dim); margin-bottom:6px;">${t.name}</div>
+                    const boxes = last7.map(day => `<div class="day-box ${dates.has(day.key) ? 'active' : ''}"></div>`).join('');
+                    return `<div style="margin-bottom:12px;">
+                        <div style="font-size:0.7rem; color:var(--text-dim); margin-bottom:4px;">${t.name}</div>
                         <div class="mini-heatmap">${boxes}</div>
                     </div>`;
                 }).join('');
 
-                return `
-                    <div class="card">
-                        <div class="collapse-header" onclick="toggleCollapse('intel-${uid}')">
-                            <div style="font-weight:800; color:var(--accent); font-size: 0.95rem;">${u.name}</div>
-                            <div style="font-size: 0.6rem; color: var(--accent); border: 1px solid var(--accent); padding: 4px 8px; border-radius: 6px;">VIEW INTEL</div>
-                        </div>
-                        <div class="collapse-content" id="intel-${uid}">
-                            ${headerHtml}
-                            ${taskRows}
-                        </div>
-                    </div>`;
+                return `<div class="card">
+                    <div class="collapse-header" onclick="toggleCollapse('intel-${uid}')">
+                        <div style="font-weight:800; color:var(--accent)">${u.name}</div>
+                        <div style="font-size:0.7rem; opacity:0.5;">DETAILS +</div>
+                    </div>
+                    <div class="collapse-content" id="intel-${uid}">${headerHtml}${taskRows}</div>
+                </div>`;
             }).join('');
         }
     </script>
